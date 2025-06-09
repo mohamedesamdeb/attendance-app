@@ -333,14 +333,6 @@
           Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
         });
     }
-
-    window.onload = () => {
-  const user = localStorage.getItem("loggedInUser");
-  if (!user) {
-    window.location.href = "login.html"; // تحويل لصفحة تسجيل الدخول إذا لم يتم تسجيل الدخول
-  }
-};
-
   </script>
 </body>
 </html>
