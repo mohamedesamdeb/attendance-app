@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>تسجيل الحضور والانصراف</title>
+  <title>🕒 نظام تسجيل الفنيين</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
       margin: 0;
@@ -113,6 +114,22 @@
       list-style-type: disc;
     }
 
+    #progressBarContainer {
+      width: 100%;
+      background: #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+      display: none;
+    }
+
+    #progressBar {
+      width: 0%;
+      height: 12px;
+      background: #28a745;
+      transition: width 0.3s;
+    }
+
     @media (max-width: 500px) {
       .container {
         padding: 15px;
@@ -185,13 +202,8 @@
     <button class="btn-attendance" onclick="startProcess('حضور')">✅ تسجيل حضور</button>
     <button class="btn-leave" onclick="startProcess('انصراف')">📤 تسجيل انصراف</button>
 
-    <!-- شريط التقدم -->
-    <div id="progressContainer" style="margin-top: 15px; display: none;">
-      <div style="background-color: #e0e0e0; border-radius: 8px; overflow: hidden;">
-        <div id="progressBar" style="height: 20px; width: 0%; background-color: #007bff; color: white; text-align: center; font-size: 14px; line-height: 20px;">
-          0%
-        </div>
-      </div>
+    <div id="progressBarContainer">
+      <div id="progressBar"></div>
     </div>
 
     <div class="warning-box">
@@ -224,8 +236,14 @@
     async function startProcess(action) {
       const name = document.getElementById("technicianSelect").value;
       const office = document.getElementById("officeSelect").value;
-      if (!name || !office) {
-        alert("يرجى اختيار الفني والمكتب");
+
+      if (!name || name === "اختر اسم الفني" || !office || office === "اختر المكتب") {
+        Swal.fire("❌ خطأ", "يرجى اختيار اسم الفني والمكتب", "error");
+        return;
+      }
+
+      if (!lat || !lng) {
+        Swal.fire("📍 تحديد الموقع", "يرجى تحديد الموقع أولاً", "warning");
         return;
       }
 
@@ -243,65 +261,55 @@
           stream.getTracks().forEach(track => track.stop());
           video.style.display = "none";
 
-          sendData({ name, action, office, image });
+          simulateProgress(() => {
+            sendData({ name, action, office, image });
+          });
         }, 3000);
 
       } catch (err) {
-        alert("⚠️ فشل في تشغيل الكاميرا");
+        Swal.fire("⚠️ خطأ", "فشل في تشغيل الكاميرا", "error");
       }
     }
 
-    async function sendData({ name, action, office, image }) {
-      const data = {
-        name,
-        action,
-        office,
-        time: new Date().toLocaleString('ar-EG'),
-        lat,
-        lng,
-        image
-      };
-
-      const progressContainer = document.getElementById("progressContainer");
-      const progressBar = document.getElementById("progressBar");
-      progressContainer.style.display = "block";
-      progressBar.style.width = "0%";
-      progressBar.textContent = "0%";
-
+    function simulateProgress(callback) {
+      const barContainer = document.getElementById("progressBarContainer");
+      const bar = document.getElementById("progressBar");
+      barContainer.style.display = "block";
+      bar.style.width = "0%";
       let percent = 0;
       const interval = setInterval(() => {
-        if (percent < 90) {
-          percent += 5;
-          progressBar.style.width = percent + "%";
-          progressBar.textContent = percent + "%";
+        percent += 5;
+        bar.style.width = percent + "%";
+        if (percent >= 100) {
+          clearInterval(interval);
+          barContainer.style.display = "none";
+          callback();
         }
       }, 100);
+    }
 
-      try {
-        const res = await fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
-          method: "POST",
-          body: JSON.stringify(data)
+    function sendData({ name, action, office, image }) {
+      const data = {
+        name, action, office,
+        time: new Date().toLocaleString('ar-EG'),
+        lat, lng, image
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
+        method: "POST",
+        body: JSON.stringify(data)
+      })
+        .then(res => res.text())
+        .then(msg => {
+          Swal.fire({
+            icon: 'success',
+            title: '✅ تم الإرسال بنجاح',
+            confirmButtonText: 'OK'
+          });
+        })
+        .catch(err => {
+          Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
         });
-
-        clearInterval(interval);
-        progressBar.style.width = "100%";
-        progressBar.textContent = "100%";
-
-        setTimeout(() => {
-          alert("✅ تم إرسال البيانات بنجاح");
-          progressContainer.style.display = "none";
-        }, 500);
-
-      } catch (err) {
-        clearInterval(interval);
-        progressBar.style.width = "100%";
-        progressBar.textContent = "100%";
-
-        setTimeout(() => {
-          alert("⚠️ فشل إرسال البيانات");
-          progressContainer.style.display = "none";
-        }, 500);
-      }
     }
   </script>
 </body>
