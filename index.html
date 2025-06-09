@@ -6,6 +6,7 @@
   <title>🕒 نظام تسجيل الفنيين</title>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    /* نفس التنسيقات السابقة */
     body {
       margin: 0;
       font-family: 'Tahoma', sans-serif;
@@ -314,6 +315,13 @@
                   icon: 'success',
                   title: '✅ تم الإرسال بنجاح',
                   confirmButtonText: 'OK'
+                }).then(() => {
+                  // تفريغ الحقول بعد الضغط OK
+                  document.getElementById("technicianSelect").selectedIndex = 0;
+                  document.getElementById("officeSelect").selectedIndex = 0;
+                  lat = "";
+                  lng = "";
+                  document.getElementById("locationDisplay").textContent = "لم يتم تحديد الموقع";
                 });
               }, 300);
             }
