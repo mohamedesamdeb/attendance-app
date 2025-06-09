@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل الحضور والانصراف</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Tahoma', sans-serif;
+      background-color: #f1f1f1;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 450px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #444;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .btn-location {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+    }
+
+    .btn-attendance {
+      background-color: #28a745;
+      color: white;
+      border: none;
+    }
+
+    .btn-leave {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+    }
+
+    #locationDisplay {
+      margin-top: 10px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    video, canvas {
+      display: none;
+      margin-top: 15px;
+      width: 100%;
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        padding: 15px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      select, button {
+        font-size: 15px;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📋 تسجيل الحضور والانصراف</h2>
+
+    <label for="technicianSelect">اسم الفني:</label>
+    <select id="technicianSelect">
+      <option disabled selected>اختر اسم الفني</option>
+      <option>أحمد علي</option>
+      <option>محمد سمير</option>
+      <option>خالد محمود</option>
+      <option>ياسر حسن</option>
+      <option>طارق عبد الله</option>
+      <option>سعيد جمال</option>
+      <option>فارس يوسف</option>
+      <option>عمرو عادل</option>
+      <option>مروان حسن</option>
+      <option>عصام سالم</option>
+      <option>كريم نبيل</option>
+      <option>إبراهيم فوزي</option>
+      <option>سامح هاني</option>
+      <option>مازن محمد</option>
+      <option>خليل أيمن</option>
+      <option>محمود نادر</option>
+      <option>نور الدين حسن</option>
+      <option>أيمن سالم</option>
+      <option>حسين شعبان</option>
+      <option>عبدالله فتحي</option>
+      <option>شادي طارق</option>
+      <option>ماجد حسين</option>
+      <option>جمال رضا</option>
+      <option>علاء عادل</option>
+      <option>كريم سامي</option>
+    </select>
+
+    <label for="officeSelect">المكتب:</label>
+    <select id="officeSelect">
+      <option disabled selected>اختر المكتب</option>
+      <option>شبرا</option>
+      <option>جسر السويس</option>
+      <option>المهندسين</option>
+    </select>
+
+    <button class="btn-location" onclick="getLocation()">📍 تحديد موقعي</button>
+    <div id="locationDisplay">لم يتم تحديد الموقع</div>
+
+    <button class="btn-attendance" onclick="startProcess('حضور')">✅ تسجيل حضور</button>
+    <button class="btn-leave" onclick="startProcess('انصراف')">📤 تسجيل انصراف</button>
+
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" width="300" height="200"></canvas>
+  </div>
+
+  <script>
+    let lat = "", lng = "";
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          lat = pos.coords.latitude.toFixed(6);
+          lng = pos.coords.longitude.toFixed(6);
+          document.getElementById("locationDisplay").textContent = `📍 الموقع الحالي: ${lat}, ${lng}`;
+        }, () => alert("⚠️ فشل في تحديد الموقع"));
+      } else {
+        alert("⚠️ المتصفح لا يدعم تحديد الموقع");
+      }
+    }
+
+    async function startProcess(action) {
+      const name = document.getElementById("technicianSelect").value;
+      const office = document.getElementById("officeSelect").value;
+      if (!name || !office) {
+        alert("يرجى اختيار الفني والمكتب");
+        return;
+      }
+
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+        video.srcObject = stream;
+        video.style.display = "block";
+
+        setTimeout(() => {
+          canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+          const image = canvas.toDataURL('image/png');
+          stream.getTracks().forEach(track => track.stop());
+          video.style.display = "none";
+
+          sendData({ name, action, office, image });
+        }, 3000);
+
+      } catch (err) {
+        alert("⚠️ فشل في تشغيل الكاميرا");
+      }
+    }
+
+    function sendData({ name, action, office, image }) {
+      const data = {
+        name, action, office,
+        time: new Date().toLocaleString('ar-EG'),
+        lat, lng, image
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
+        method: "POST",
+        body: JSON.stringify(data)
+      })
+        .then(res => res.text())
+        .then(msg => alert("✅ تم إرسال البيانات"))
+        .catch(err => alert("⚠️ فشل الإرسال"));
+    }
+  </script>
+</body>
+</html>
