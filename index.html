@@ -289,28 +289,49 @@
     }
 
     function sendData({ name, action, office, image }) {
-      const data = {
-        name, action, office,
-        time: new Date().toLocaleString('ar-EG'),
-        lat, lng, image
-      };
+  const data = {
+    name, action, office,
+    time: new Date().toLocaleString('ar-EG'),
+    lat, lng, image
+  };
 
-      fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
-        method: "POST",
-        body: JSON.stringify(data)
-      })
-        .then(res => res.text())
-        .then(msg => {
-          Swal.fire({
-            icon: 'success',
-            title: '✅ تم الإرسال بنجاح',
-            confirmButtonText: 'OK'
-          });
-        })
-        .catch(err => {
-          Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
-        });
+  const barContainer = document.getElementById("progressBarContainer");
+  const bar = document.getElementById("progressBar");
+  barContainer.style.display = "block";
+  bar.style.width = "0%";
+
+  let percent = 0;
+  const interval = setInterval(() => {
+    if (percent < 90) {
+      percent += 1;
+      bar.style.width = percent + "%";
     }
+  }, 50); // سرعة التحميل
+
+  fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+    .then(res => res.text())
+    .then(msg => {
+      clearInterval(interval);
+      bar.style.width = "100%";
+      setTimeout(() => {
+        barContainer.style.display = "none";
+        Swal.fire({
+          icon: 'success',
+          title: '✅ تم الإرسال بنجاح',
+          confirmButtonText: 'OK'
+        });
+      }, 500);
+    })
+    .catch(err => {
+      clearInterval(interval);
+      barContainer.style.display = "none";
+      Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
+    });
+}
+
   </script>
 </body>
 </html>
