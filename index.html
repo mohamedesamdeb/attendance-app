@@ -1,4 +1,4 @@
-x<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -10,6 +10,9 @@ x<!DOCTYPE html>
       font-family: 'Tahoma', sans-serif;
       background-color: #f1f1f1;
       padding: 20px;
+      position: relative;
+      height: 100vh;
+      overflow-x: hidden;
     }
 
     .container {
@@ -19,6 +22,8 @@ x<!DOCTYPE html>
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       padding: 20px;
+      position: relative;
+      z-index: 1;
     }
 
     h2 {
@@ -73,12 +78,23 @@ x<!DOCTYPE html>
       font-size: 14px;
     }
 
-    video, canvas {
+    /* تعديل ظهور الفيديو في وسط الشاشة فوق الفورم */
+    #video {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      max-width: 90vw;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      z-index: 1000;
       display: none;
-      margin-top: 15px;
-      width: 100%;
-      max-width: 100%;
-      border-radius: 8px;
+      background: black;
+    }
+
+    canvas {
+      display: none;
     }
 
     @media (max-width: 500px) {
@@ -94,10 +110,17 @@ x<!DOCTYPE html>
         font-size: 15px;
         padding: 10px;
       }
+
+      #video {
+        width: 90vw;
+      }
     }
   </style>
 </head>
 <body>
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas" width="300" height="200"></canvas>
+
   <div class="container">
     <h2>📋 تسجيل الحضور والانصراف</h2>
 
@@ -144,9 +167,6 @@ x<!DOCTYPE html>
 
     <button class="btn-attendance" onclick="startProcess('حضور')">✅ تسجيل حضور</button>
     <button class="btn-leave" onclick="startProcess('انصراف')">📤 تسجيل انصراف</button>
-
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" width="300" height="200"></canvas>
   </div>
 
   <script>
