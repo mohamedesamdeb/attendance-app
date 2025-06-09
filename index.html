@@ -125,20 +125,6 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
-    /* عد تنازلي */
-    #countdown {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 60px;
-      color: white;
-      text-shadow: 0 0 10px black;
-      z-index: 1100;
-      display: none;
-      user-select: none;
-    }
-
     @media (max-width: 500px) {
       .container {
         padding: 15px;
@@ -162,8 +148,6 @@
 <body>
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas" width="300" height="200"></canvas>
-
-  <div id="countdown"></div>
 
   <div id="progressCircleContainer">
     <svg id="progressCircle" width="120" height="120">
@@ -267,36 +251,19 @@
 
       const video = document.getElementById("video");
       const canvas = document.getElementById("canvas");
-      const countdown = document.getElementById("countdown");
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         video.srcObject = stream;
         video.style.display = "block";
 
-        // عرض العد التنازلي 3 ثواني
-        let count = 3;
-        countdown.textContent = count;
-        countdown.style.display = "block";
-
-        const countdownInterval = setInterval(() => {
-          count--;
-          if (count === 0) {
-            clearInterval(countdownInterval);
-            countdown.style.display = "none";
-
-            // التقاط الصورة
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            const image = canvas.toDataURL('image/png');
-            stream.getTracks().forEach(track => track.stop());
-            video.style.display = "none";
-
-            sendData({ name, action, office, image });
-
-          } else {
-            countdown.textContent = count;
-          }
-        }, 1000);
+        setTimeout(() => {
+          canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+          const image = canvas.toDataURL('image/png');
+          stream.getTracks().forEach(track => track.stop());
+          video.style.display = "none";
+          sendData({ name, action, office, image });
+        }, 3000);
 
       } catch (err) {
         Swal.fire("⚠️", "فشل في تشغيل الكاميرا", "error");
@@ -304,16 +271,67 @@
     }
 
     function sendData({ name, action, office, image }) {
-      // هنا يمكنك تعديل هذه الدالة لإرسال البيانات للسيرفر عبر AJAX أو Fetch API
-      Swal.fire({
-        icon: 'success',
-        title: 'تم تسجيل ' + action,
-        text: `تم تسجيل ${action} للفني ${name} بمكتب ${office}`,
-        imageUrl: image,
-        imageAlt: 'صورة الكاميرا',
-      });
-      // في حالة وجود API: 
-      // fetch('/api/attendance', {method:'POST', body: JSON.stringify({...}) ...})
+      const data = {
+        name, action, office,
+        time: new Date().toLocaleString('ar-EG'),
+        lat, lng, image
+      };
+
+      const circleContainer = document.getElementById("progressCircleContainer");
+      const progressBar = document.getElementById("progressCircleBar");
+      const progressText = document.getElementById("progressText");
+
+      circleContainer.style.display = "block";
+      let percent = 0;
+
+      const interval = setInterval(() => {
+        if (percent < 90) {
+          percent++;
+          const offset = 314 - (314 * percent) / 100;
+          progressBar.setAttribute("stroke-dashoffset", offset);
+          progressText.textContent = `${percent}%`;
+        }
+      }, 50);
+
+      fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
+        method: "POST",
+        body: JSON.stringify(data)
+      })
+        .then(res => res.text())
+        .then(msg => {
+          clearInterval(interval);
+          let finalPercent = percent;
+          const complete = setInterval(() => {
+            if (finalPercent < 100) {
+              finalPercent++;
+              const offset = 314 - (314 * finalPercent) / 100;
+              progressBar.setAttribute("stroke-dashoffset", offset);
+              progressText.textContent = `${finalPercent}%`;
+            } else {
+              clearInterval(complete);
+              setTimeout(() => {
+                circleContainer.style.display = "none";
+                Swal.fire({
+                  icon: 'success',
+                  title: '✅ تم الإرسال بنجاح',
+                  confirmButtonText: 'OK'
+                }).then(() => {
+                  // تفريغ الحقول بعد الضغط OK
+                  document.getElementById("technicianSelect").selectedIndex = 0;
+                  document.getElementById("officeSelect").selectedIndex = 0;
+                  lat = "";
+                  lng = "";
+                  document.getElementById("locationDisplay").textContent = "لم يتم تحديد الموقع";
+                });
+              }, 300);
+            }
+          }, 20);
+        })
+        .catch(err => {
+          clearInterval(interval);
+          circleContainer.style.display = "none";
+          Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
+        });
     }
   </script>
 </body>
