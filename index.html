@@ -195,35 +195,20 @@ x<!DOCTYPE html>
     }
 
     function sendData({ name, action, office, image }) {
-  const now = new Date();
-  const hour = now.getHours();
+      const data = {
+        name, action, office,
+        time: new Date().toLocaleString('ar-EG'),
+        lat, lng, image
+      };
 
-  const data = {
-    name,
-    action,
-    office,
-    time: now.toLocaleString('ar-EG'),
-    lat,
-    lng,
-    image
-  };
-
-  fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
-    method: "POST",
-    body: JSON.stringify(data)
-  })
-    .then(res => res.text())
-    .then(msg => {
-      alert("✅ تم إرسال البيانات");
-      if (action === "حضور" && hour >= 10) {
-        setTimeout(() => {
-          alert("⚠️ تم تسجيل حضور بعد الساعة 10 صباحًا، لذلك هناك خصم نصف يوم بسبب التأخير.");
-        }, 200);
-      }
-    })
-    .catch(err => alert("⚠️ فشل الإرسال"));
-}
-
+      fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
+        method: "POST",
+        body: JSON.stringify(data)
+      })
+        .then(res => res.text())
+        .then(msg => alert("✅ تم إرسال البيانات"))
+        .catch(err => alert("⚠️ فشل الإرسال"));
+    }
   </script>
 </body>
 </html>
