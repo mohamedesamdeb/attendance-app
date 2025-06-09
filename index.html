@@ -145,6 +145,7 @@
     }
   </style>
 </head>
+  
 <body>
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas" width="300" height="200"></canvas>
@@ -159,6 +160,18 @@
   </div>
 
   <div class="container">
+<!-- زر فتح القائمة الجانبية -->
+<button onclick="openSidebar()" style="position: fixed; top: 20px; right: 20px; z-index: 10001; background-color: #007bff; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer;">☰</button>
+
+<!-- القائمة الجانبية -->
+<div id="sidebar" style="position: fixed; top: 0; right: -250px; width: 250px; height: 100%; background-color: #343a40; color: white; padding: 20px; transition: right 0.3s ease; z-index: 10000;">
+  <button onclick="closeSidebar()" style="background-color: transparent; color: white; border: none; font-size: 28px; position: absolute; top: 10px; left: 10px; cursor: pointer;">×</button>
+  <h3 style="margin-top: 50px;">القائمة الجانبية</h3>
+  <hr style="border-color: #555;" />
+  <button onclick="callManager()" style="width: 100%; background-color: #28a745; border: none; padding: 12px; color: white; border-radius: 8px; margin-top: 10px; font-size: 16px;">📞 اتصل بالمدير</button>
+  <button onclick="whatsappManager()" style="width: 100%; background-color: #25D366; border: none; padding: 12px; color: white; border-radius: 8px; margin-top: 10px; font-size: 16px;">💬 راسل واتساب</button>
+</div>
+
     <h2>Trio-Telecom</h2>
     <h2>🕒 نظام تسجيل الفنيين</h2>
 
@@ -333,6 +346,23 @@
           Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
         });
     }
+    function openSidebar() {
+  document.getElementById("sidebar").style.right = "0";
+}
+
+function closeSidebar() {
+  document.getElementById("sidebar").style.right = "-250px";
+}
+
+function callManager() {
+  window.location.href = "tel:01111955844";
+}
+
+function whatsappManager() {
+  const phone = "01111955844";
+  window.open(`https://wa.me/2${phone}`, "_blank");
+}
+
   </script>
 </body>
 </html>
