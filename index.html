@@ -1,4 +1,4 @@
-x<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -73,12 +73,25 @@ x<!DOCTYPE html>
       font-size: 14px;
     }
 
-    video, canvas {
+    /* شاشة الكاميرا في المنتصف */
+    #cameraOverlay {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
       display: none;
-      margin-top: 15px;
-      width: 100%;
-      max-width: 100%;
-      border-radius: 8px;
+    }
+
+    #cameraOverlay video {
+      max-width: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
 
     @media (max-width: 500px) {
@@ -144,9 +157,12 @@ x<!DOCTYPE html>
 
     <button class="btn-attendance" onclick="startProcess('حضور')">✅ تسجيل حضور</button>
     <button class="btn-leave" onclick="startProcess('انصراف')">📤 تسجيل انصراف</button>
+  </div>
 
+  <!-- شاشة الكاميرا -->
+  <div id="cameraOverlay">
     <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" width="300" height="200"></canvas>
+    <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
   </div>
 
   <script>
@@ -174,17 +190,19 @@ x<!DOCTYPE html>
 
       const video = document.getElementById("video");
       const canvas = document.getElementById("canvas");
+      const cameraOverlay = document.getElementById("cameraOverlay");
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         video.srcObject = stream;
-        video.style.display = "block";
+        cameraOverlay.style.display = "flex";
 
         setTimeout(() => {
-          canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           const image = canvas.toDataURL('image/png');
           stream.getTracks().forEach(track => track.stop());
-          video.style.display = "none";
+          cameraOverlay.style.display = "none";
 
           sendData({ name, action, office, image });
         }, 3000);
