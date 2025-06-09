@@ -78,7 +78,6 @@
       font-size: 14px;
     }
 
-    /* تعديل ظهور الفيديو في وسط الشاشة فوق الفورم */
     #video {
       position: fixed;
       top: 50%;
@@ -93,11 +92,30 @@
       background: black;
     }
 
+    #loading {
+      text-align: center;
+      margin-top: 15px;
+      color: #007bff;
+      font-weight: bold;
+      display: none;
+    }
+
+    #messageBox {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+
+    .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
     canvas {
       display: none;
     }
 
-    /* صندوق التحذير */
     .warning-box {
       margin-top: 20px;
       background-color: #ffe6e6;
@@ -187,6 +205,9 @@
     <button class="btn-attendance" onclick="startProcess('حضور')">✅ تسجيل حضور</button>
     <button class="btn-leave" onclick="startProcess('انصراف')">📤 تسجيل انصراف</button>
 
+    <div id="loading">📷 جاري تشغيل الكاميرا والتقاط الصورة...</div>
+    <div id="messageBox"></div>
+
     <div class="warning-box">
       ⚠️ مهم جداً:
       <ul>
@@ -202,62 +223,106 @@
   <script>
     let lat = "", lng = "";
 
+    const technicianSelect = document.getElementById("technicianSelect");
+    const officeSelect = document.getElementById("officeSelect");
+    const messageBox = document.getElementById("messageBox");
+
+    window.onload = () => {
+      // تحميل بيانات محفوظة
+      const savedName = localStorage.getItem("technician");
+      const savedOffice = localStorage.getItem("office");
+      if (savedName) technicianSelect.value = savedName;
+      if (savedOffice) officeSelect.value = savedOffice;
+    }
+
     function getLocation() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
           lat = pos.coords.latitude.toFixed(6);
           lng = pos.coords.longitude.toFixed(6);
           document.getElementById("locationDisplay").textContent = `📍 الموقع الحالي: ${lat}, ${lng}`;
-        }, () => alert("⚠️ فشل في تحديد الموقع"));
+        }, () => showMessage("⚠️ فشل في تحديد الموقع", "error"));
       } else {
-        alert("⚠️ المتصفح لا يدعم تحديد الموقع");
+        showMessage("⚠️ المتصفح لا يدعم تحديد الموقع", "error");
       }
     }
 
     async function startProcess(action) {
-      const name = document.getElementById("technicianSelect").value;
-      const office = document.getElementById("officeSelect").value;
-      if (!name || !office) {
-        alert("يرجى اختيار الفني والمكتب");
+      const name = technicianSelect.value;
+      const office = officeSelect.value;
+
+      if (!name || !office || name.includes("اختر") || office.includes("اختر")) {
+        showMessage("❗ يرجى اختيار الفني والمكتب", "error");
         return;
       }
 
+      if (!lat || !lng) {
+        showMessage("❗ يجب تحديد الموقع أولاً", "error");
+        return;
+      }
+
+      if (!confirm(`هل أنت متأكد من تسجيل ${action} الآن؟`)) return;
+
+      localStorage.setItem("technician", name);
+      localStorage.setItem("office", office);
+
       const video = document.getElementById("video");
       const canvas = document.getElementById("canvas");
+      const loading = document.getElementById("loading");
 
       try {
+        loading.style.display = "block";
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         video.srcObject = stream;
         video.style.display = "block";
 
-        setTimeout(() => {
+        setTimeout(async () => {
           canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
           const image = canvas.toDataURL('image/png');
           stream.getTracks().forEach(track => track.stop());
           video.style.display = "none";
+          loading.style.display = "none";
 
-          sendData({ name, action, office, image });
+          await sendData({ name, action, office, image });
         }, 3000);
 
       } catch (err) {
-        alert("⚠️ فشل في تشغيل الكاميرا");
+        loading.style.display = "none";
+        showMessage("⚠️ فشل في تشغيل الكاميرا", "error");
       }
     }
 
-    function sendData({ name, action, office, image }) {
+    async function sendData({ name, action, office, image }) {
       const data = {
-        name, action, office,
-        time: new Date().toLocaleString('ar-EG'),
-        lat, lng, image
+        name,
+        action,
+        office,
+        time: new Date().toISOString(),
+        lat,
+        lng,
+        image
       };
 
-      fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
-        method: "POST",
-        body: JSON.stringify(data)
-      })
-        .then(res => res.text())
-        .then(msg => alert("✅ تم إرسال البيانات"))
-        .catch(err => alert("⚠️ فشل الإرسال"));
+      try {
+        const res = await fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
+          method: "POST",
+          body: JSON.stringify(data)
+        });
+        const msg = await res.text();
+        showMessage("✅ تم إرسال البيانات بنجاح", "success");
+      } catch (err) {
+        showMessage("⚠️ فشل إرسال البيانات", "error");
+      }
+    }
+
+    function showMessage(msg, type) {
+      messageBox.textContent = msg;
+      messageBox.className = "";
+      messageBox.classList.add(type === "success" ? "success" : "error");
+      messageBox.style.display = "block";
+      setTimeout(() => {
+        messageBox.style.display = "none";
+      }, 4000);
     }
   </script>
 </body>
