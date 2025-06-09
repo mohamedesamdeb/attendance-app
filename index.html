@@ -11,7 +11,6 @@
       font-family: 'Tahoma', sans-serif;
       background-color: #f1f1f1;
       padding: 20px;
-      position: relative;
       height: 100vh;
       overflow-x: hidden;
     }
@@ -24,7 +23,6 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       padding: 20px;
       position: relative;
-      z-index: 1;
     }
 
     h2 {
@@ -47,7 +45,6 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 16px;
-      box-sizing: border-box;
     }
 
     button {
@@ -114,20 +111,17 @@
       list-style-type: disc;
     }
 
-    #progressBarContainer {
-      width: 100%;
-      background: #ccc;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 10px;
+    #progressCircleContainer {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
       display: none;
-    }
-
-    #progressBar {
-      width: 0%;
-      height: 12px;
-      background: #28a745;
-      transition: width 0.3s;
+      background: white;
+      border-radius: 50%;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
     @media (max-width: 500px) {
@@ -153,6 +147,15 @@
 <body>
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas" width="300" height="200"></canvas>
+
+  <div id="progressCircleContainer">
+    <svg id="progressCircle" width="120" height="120">
+      <circle cx="60" cy="60" r="50" stroke="#e6e6e6" stroke-width="10" fill="none"/>
+      <circle id="progressCircleBar" cx="60" cy="60" r="50" stroke="#28a745" stroke-width="10" fill="none"
+              stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="314" stroke-dashoffset="314"/>
+      <text id="progressText" x="60" y="68" text-anchor="middle" font-size="22" fill="#333">0%</text>
+    </svg>
+  </div>
 
   <div class="container">
     <h2>Trio-Telecom</h2>
@@ -202,10 +205,6 @@
     <button class="btn-attendance" onclick="startProcess('حضور')">✅ تسجيل حضور</button>
     <button class="btn-leave" onclick="startProcess('انصراف')">📤 تسجيل انصراف</button>
 
-    <div id="progressBarContainer">
-      <div id="progressBar"></div>
-    </div>
-
     <div class="warning-box">
       ⚠️ مهم جداً:
       <ul>
@@ -238,12 +237,12 @@
       const office = document.getElementById("officeSelect").value;
 
       if (!name || name === "اختر اسم الفني" || !office || office === "اختر المكتب") {
-        Swal.fire("❌ خطأ", "يرجى اختيار اسم الفني والمكتب", "error");
+        alert("يرجى اختيار الفني والمكتب");
         return;
       }
 
       if (!lat || !lng) {
-        Swal.fire("📍 تحديد الموقع", "يرجى تحديد الموقع أولاً", "warning");
+        alert("يرجى تحديد الموقع أولاً");
         return;
       }
 
@@ -260,78 +259,70 @@
           const image = canvas.toDataURL('image/png');
           stream.getTracks().forEach(track => track.stop());
           video.style.display = "none";
-
-          simulateProgress(() => {
-            sendData({ name, action, office, image });
-          });
+          sendData({ name, action, office, image });
         }, 3000);
 
       } catch (err) {
-        Swal.fire("⚠️ خطأ", "فشل في تشغيل الكاميرا", "error");
+        alert("⚠️ فشل في تشغيل الكاميرا");
       }
     }
 
-    function simulateProgress(callback) {
-      const barContainer = document.getElementById("progressBarContainer");
-      const bar = document.getElementById("progressBar");
-      barContainer.style.display = "block";
-      bar.style.width = "0%";
-      let percent = 0;
-      const interval = setInterval(() => {
-        percent += 5;
-        bar.style.width = percent + "%";
-        if (percent >= 100) {
-          clearInterval(interval);
-          barContainer.style.display = "none";
-          callback();
-        }
-      }, 100);
-    }
-
     function sendData({ name, action, office, image }) {
-  const data = {
-    name, action, office,
-    time: new Date().toLocaleString('ar-EG'),
-    lat, lng, image
-  };
+      const data = {
+        name, action, office,
+        time: new Date().toLocaleString('ar-EG'),
+        lat, lng, image
+      };
 
-  const barContainer = document.getElementById("progressBarContainer");
-  const bar = document.getElementById("progressBar");
-  barContainer.style.display = "block";
-  bar.style.width = "0%";
+      const circleContainer = document.getElementById("progressCircleContainer");
+      const progressBar = document.getElementById("progressCircleBar");
+      const progressText = document.getElementById("progressText");
 
-  let percent = 0;
-  const interval = setInterval(() => {
-    if (percent < 90) {
-      percent += 1;
-      bar.style.width = percent + "%";
-    }
-  }, 50); // سرعة التحميل
+      circleContainer.style.display = "block";
+      let percent = 0;
 
-  fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
-    method: "POST",
-    body: JSON.stringify(data)
-  })
-    .then(res => res.text())
-    .then(msg => {
-      clearInterval(interval);
-      bar.style.width = "100%";
-      setTimeout(() => {
-        barContainer.style.display = "none";
-        Swal.fire({
-          icon: 'success',
-          title: '✅ تم الإرسال بنجاح',
-          confirmButtonText: 'OK'
+      const interval = setInterval(() => {
+        if (percent < 90) {
+          percent++;
+          const offset = 314 - (314 * percent) / 100;
+          progressBar.setAttribute("stroke-dashoffset", offset);
+          progressText.textContent = `${percent}%`;
+        }
+      }, 50);
+
+      fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
+        method: "POST",
+        body: JSON.stringify(data)
+      })
+        .then(res => res.text())
+        .then(msg => {
+          clearInterval(interval);
+          let finalPercent = percent;
+          const complete = setInterval(() => {
+            if (finalPercent < 100) {
+              finalPercent++;
+              const offset = 314 - (314 * finalPercent) / 100;
+              progressBar.setAttribute("stroke-dashoffset", offset);
+              progressText.textContent = `${finalPercent}%`;
+            } else {
+              clearInterval(complete);
+              setTimeout(() => {
+                circleContainer.style.display = "none";
+                Swal.fire({
+                  icon: 'success',
+                  title: '✅ تم الإرسال بنجاح',
+                  confirmButtonText: 'OK'
+                });
+              }, 300);
+            }
+          }, 20);
+        })
+        .catch(err => {
+          clearInterval(interval);
+          circleContainer.style.display = "none";
+          Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
         });
-      }, 500);
-    })
-    .catch(err => {
-      clearInterval(interval);
-      barContainer.style.display = "none";
-      Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
-    });
-}
-
+    }
   </script>
 </body>
 </html>
