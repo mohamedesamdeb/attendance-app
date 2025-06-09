@@ -4,13 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🕒 نظام تسجيل الفنيين</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    /* نفس التنسيقات السابقة */
     body {
       margin: 0;
       font-family: 'Tahoma', sans-serif;
       background-color: #f1f1f1;
       padding: 20px;
-      position: relative;
       height: 100vh;
       overflow-x: hidden;
     }
@@ -23,7 +24,6 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       padding: 20px;
       position: relative;
-      z-index: 1;
     }
 
     h2 {
@@ -46,7 +46,6 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 16px;
-      box-sizing: border-box;
     }
 
     button {
@@ -78,7 +77,6 @@
       font-size: 14px;
     }
 
-    /* تعديل ظهور الفيديو في وسط الشاشة فوق الفورم */
     #video {
       position: fixed;
       top: 50%;
@@ -97,7 +95,6 @@
       display: none;
     }
 
-    /* صندوق التحذير */
     .warning-box {
       margin-top: 20px;
       background-color: #ffe6e6;
@@ -115,50 +112,17 @@
       list-style-type: disc;
     }
 
-    /* صندوق الرسائل المؤقت */
-    #messageBox {
+    #progressCircleContainer {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      padding: 25px 30px;
-      text-align: center;
-      z-index: 1100;
+      z-index: 9999;
       display: none;
-      width: 320px;
-      font-family: 'Tahoma', sans-serif;
-    }
-
-    #progressCircle {
-      margin: 15px auto 20px auto;
-      display: block;
-      width: 100px;
-      height: 100px;
-    }
-
-    #progressText {
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: -85px;
-      text-align: center;
-      color: #333;
-    }
-
-    #messageBox button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    #messageBox button:hover {
-      background-color: #218838;
+      background: white;
+      border-radius: 50%;
+      padding: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
     @media (max-width: 500px) {
@@ -178,17 +142,21 @@
       #video {
         width: 90vw;
       }
-
-      #messageBox {
-        width: 90vw;
-        padding: 20px;
-      }
     }
   </style>
 </head>
 <body>
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas" width="300" height="200"></canvas>
+
+  <div id="progressCircleContainer">
+    <svg id="progressCircle" width="120" height="120">
+      <circle cx="60" cy="60" r="50" stroke="#e6e6e6" stroke-width="10" fill="none"/>
+      <circle id="progressCircleBar" cx="60" cy="60" r="50" stroke="#28a745" stroke-width="10" fill="none"
+              stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="314" stroke-dashoffset="314"/>
+      <text id="progressText" x="60" y="68" text-anchor="middle" font-size="22" fill="#333">0%</text>
+    </svg>
+  </div>
 
   <div class="container">
     <h2>Trio-Telecom</h2>
@@ -250,17 +218,6 @@
     </div>
   </div>
 
-  <div id="messageBox">
-    <svg id="progressCircle" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="45" stroke="#ddd" stroke-width="10" fill="none"/>
-      <circle id="progressBar" cx="50" cy="50" r="45" stroke="#28a745" stroke-width="10" fill="none"
-        stroke-linecap="round" stroke-dasharray="282.6" stroke-dashoffset="282.6"/>
-    </svg>
-    <div id="progressText">0%</div>
-    <div id="messageText" style="margin-top: 15px; font-weight: bold; color: #333;"></div>
-    <button id="okButton" style="display:none;" onclick="closeMessage()">OK</button>
-  </div>
-
   <script>
     let lat = "", lng = "";
 
@@ -270,9 +227,11 @@
           lat = pos.coords.latitude.toFixed(6);
           lng = pos.coords.longitude.toFixed(6);
           document.getElementById("locationDisplay").textContent = `📍 الموقع الحالي: ${lat}, ${lng}`;
-        }, () => alert("⚠️ فشل في تحديد الموقع"));
+        }, () => {
+          Swal.fire("⚠️", "فشل في تحديد الموقع", "warning");
+        });
       } else {
-        alert("⚠️ المتصفح لا يدعم تحديد الموقع");
+        Swal.fire("⚠️", "المتصفح لا يدعم تحديد الموقع", "warning");
       }
     }
 
@@ -280,13 +239,13 @@
       const name = document.getElementById("technicianSelect").value;
       const office = document.getElementById("officeSelect").value;
 
-      if (!name || !office) {
-        alert("يرجى اختيار الفني والمكتب");
+      if (!name || name === "اختر اسم الفني" || !office || office === "اختر المكتب") {
+        Swal.fire("تنبيه", "يرجى اختيار الفني والمكتب", "info");
         return;
       }
 
       if (!lat || !lng) {
-        alert("يرجى تحديد الموقع أولاً");
+        Swal.fire("تنبيه", "يرجى تحديد الموقع أولاً", "info");
         return;
       }
 
@@ -299,34 +258,15 @@
         video.style.display = "block";
 
         setTimeout(() => {
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-          // إضافة خلفية للنص في أسفل الصورة
-          ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-          ctx.fillRect(0, canvas.height - 70, canvas.width, 70);
-
-          ctx.fillStyle = "white";
-          ctx.font = "16px Tahoma";
-          ctx.textAlign = "right";
-
-          const now = new Date();
-          const timeString = now.toLocaleTimeString('ar-EG');
-          const dateString = now.toLocaleDateString('ar-EG');
-
-          ctx.fillText(`الفني: ${name}`, canvas.width - 10, canvas.height - 50);
-          ctx.fillText(`التاريخ: ${dateString}`, canvas.width - 10, canvas.height - 30);
-          ctx.fillText(`الوقت: ${timeString}`, canvas.width - 10, canvas.height - 10);
-
+          canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
           const image = canvas.toDataURL('image/png');
           stream.getTracks().forEach(track => track.stop());
           video.style.display = "none";
-
           sendData({ name, action, office, image });
         }, 3000);
 
       } catch (err) {
-        alert("⚠️ فشل في تشغيل الكاميرا");
+        Swal.fire("⚠️", "فشل في تشغيل الكاميرا", "error");
       }
     }
 
@@ -337,75 +277,61 @@
         lat, lng, image
       };
 
-      // عرض صندوق الرسالة والبدء في العد من 0 إلى 100%
-      showMessageBox("جاري إرسال البيانات ...");
+      const circleContainer = document.getElementById("progressCircleContainer");
+      const progressBar = document.getElementById("progressCircleBar");
+      const progressText = document.getElementById("progressText");
 
-      let progress = 0;
+      circleContainer.style.display = "block";
+      let percent = 0;
+
       const interval = setInterval(() => {
-        progress += 2; // سرعة العد 2%
-        updateProgress(progress);
-
-        if (progress >= 100) {
-          clearInterval(interval);
-          // بعد الانتهاء من العد نرسل البيانات
-          fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
-            method: "POST",
-            body: JSON.stringify(data)
-          })
-          .then(res => res.text())
-          .then(msg => {
-            updateMessage("✅ تم إرسال البيانات بنجاح");
-            showOkButton(true);
-            clearForm();
-          })
-          .catch(err => {
-            updateMessage("⚠️ فشل في إرسال البيانات");
-            showOkButton(true);
-          });
+        if (percent < 90) {
+          percent++;
+          const offset = 314 - (314 * percent) / 100;
+          progressBar.setAttribute("stroke-dashoffset", offset);
+          progressText.textContent = `${percent}%`;
         }
-      }, 60);
-    }
+      }, 50);
 
-    function showMessageBox(message) {
-      const box = document.getElementById("messageBox");
-      document.getElementById("progressText").textContent = "0%";
-      document.getElementById("progressBar").style.strokeDashoffset = 282.6;
-      document.getElementById("messageText").textContent = message;
-      showOkButton(false);
-      box.style.display = "block";
-    }
-
-    function updateProgress(value) {
-      const circle = document.getElementById("progressBar");
-      const text = document.getElementById("progressText");
-      const radius = 45;
-      const circumference = 2 * Math.PI * radius;
-
-      const offset = circumference - (value / 100) * circumference;
-      circle.style.strokeDashoffset = offset;
-      text.textContent = value + "%";
-    }
-
-    function updateMessage(message) {
-      document.getElementById("messageText").textContent = message;
-    }
-
-    function showOkButton(show) {
-      const btn = document.getElementById("okButton");
-      btn.style.display = show ? "inline-block" : "none";
-    }
-
-    function closeMessage() {
-      const box = document.getElementById("messageBox");
-      box.style.display = "none";
-    }
-
-    function clearForm() {
-      document.getElementById("technicianSelect").selectedIndex = 0;
-      document.getElementById("officeSelect").selectedIndex = 0;
-      lat = "";
-      lng = "";
-      document.getElementById("locationDisplay").textContent = "لم يتم تحديد الموقع";
+      fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
+        method: "POST",
+        body: JSON.stringify(data)
+      })
+        .then(res => res.text())
+        .then(msg => {
+          clearInterval(interval);
+          let finalPercent = percent;
+          const complete = setInterval(() => {
+            if (finalPercent < 100) {
+              finalPercent++;
+              const offset = 314 - (314 * finalPercent) / 100;
+              progressBar.setAttribute("stroke-dashoffset", offset);
+              progressText.textContent = `${finalPercent}%`;
+            } else {
+              clearInterval(complete);
+              setTimeout(() => {
+                circleContainer.style.display = "none";
+                Swal.fire({
+                  icon: 'success',
+                  title: '✅ تم الإرسال بنجاح',
+                  confirmButtonText: 'OK'
+                }).then(() => {
+                  // تفريغ الحقول بعد الضغط OK
+                  document.getElementById("technicianSelect").selectedIndex = 0;
+                  document.getElementById("officeSelect").selectedIndex = 0;
+                  lat = "";
+                  lng = "";
+                  document.getElementById("locationDisplay").textContent = "لم يتم تحديد الموقع";
+                });
+              }, 300);
+            }
+          }, 20);
+        })
+        .catch(err => {
+          clearInterval(interval);
+          circleContainer.style.display = "none";
+          Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
+        });
     }
   </script>
 </body>
