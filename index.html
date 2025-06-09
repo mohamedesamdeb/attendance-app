@@ -97,6 +97,24 @@
       display: none;
     }
 
+    /* صندوق التحذير */
+    .warning-box {
+      margin-top: 20px;
+      background-color: #ffe6e6;
+      border: 1px solid #ff4d4d;
+      padding: 12px;
+      border-radius: 8px;
+      color: #b30000;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .warning-box ul {
+      padding-right: 15px;
+      margin: 8px 0 0 0;
+      list-style-type: disc;
+    }
+
     @media (max-width: 500px) {
       .container {
         padding: 15px;
@@ -167,6 +185,16 @@
 
     <button class="btn-attendance" onclick="startProcess('حضور')">✅ تسجيل حضور</button>
     <button class="btn-leave" onclick="startProcess('انصراف')">📤 تسجيل انصراف</button>
+
+    <div class="warning-box">
+      ⚠️ مهم جداً:
+      <ul>
+        <li>لازم الصورة تكون واضحة.</li>
+        <li>ركز وانت بتضغط تسجيل حضور أو انصراف.</li>
+        <li>لازم تضغط على زر تحديد الموقع.</li>
+      </ul>
+      أي بند من الثلاثة مش متطبق يتم احتساب تأخير.
+    </div>
   </div>
 
   <script>
