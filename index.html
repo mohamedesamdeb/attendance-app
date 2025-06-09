@@ -145,7 +145,6 @@
     }
   </style>
 </head>
-  
 <body>
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas" width="300" height="200"></canvas>
@@ -160,52 +159,6 @@
   </div>
 
   <div class="container">
-<!-- زر فتح القائمة الجانبية -->
-<button id="openSidebarBtn" onclick="openSidebar()" style="
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 10001;
-  background: none;
-  border: none;
-  font-size: 30px;
-  cursor: pointer;
-  color: #007bff;
-">☰</button>
-
-
-
-<!-- القائمة الجانبية -->
-<div id="sidebar" style="
-  position: fixed;
-  top: 0;
-  right: -270px;
-  width: 250px;
-  height: 100%;
-  background-color: #343a40;
-  color: white;
-  padding: 20px;
-  transition: right 0.3s ease;
-  z-index: 10000;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.3);
-">
-  <button onclick="closeSidebar()" style="
-    background-color: transparent;
-    color: white;
-    border: none;
-    font-size: 28px;
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    cursor: pointer;
-  ">×</button>
-  <h3 style="margin-top: 60px;">القائمة الجانبية</h3>
-  <hr style="border-color: #555;" />
-  <button onclick="callManager()" style="width: 100%; background-color: #28a745; border: none; padding: 12px; color: white; border-radius: 8px; margin-top: 10px; font-size: 16px;">📞 اتصل بالمدير</button>
-  <button onclick="whatsappManager()" style="width: 100%; background-color: #25D366; border: none; padding: 12px; color: white; border-radius: 8px; margin-top: 10px; font-size: 16px;">💬 راسل واتساب</button>
-</div>
-
-
     <h2>Trio-Telecom</h2>
     <h2>🕒 نظام تسجيل الفنيين</h2>
 
@@ -380,28 +333,6 @@
           Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
         });
     }
-    function openSidebar() {
-  document.getElementById("sidebar").style.right = "0";
-  document.getElementById("openSidebarBtn").style.display = "none";
-}
-
-function closeSidebar() {
-  document.getElementById("sidebar").style.right = "-270px";
-  setTimeout(() => {
-    document.getElementById("openSidebarBtn").style.display = "block";
-  }, 300); // بعد ما تخلص الانيميشن
-}
-
-function callManager() {
-  window.location.href = "tel:01111955844";
-}
-
-function whatsappManager() {
-  const phone = "01111955844";
-  window.open(`https://wa.me/2${phone}`, "_blank");
-}
-
-
   </script>
 </body>
 </html>
