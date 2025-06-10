@@ -690,6 +690,42 @@ document.querySelectorAll("#sidebar button").forEach((btn) => {
     document.getElementById("sidebar").classList.remove("active");
   });
 });
+
+function submitLeaveRequest() {
+  const name = document.getElementById("leave-name").value;
+  const leaveType = document.getElementById("leave-type").value;
+  const fromDate = document.getElementById("leave-from").value;
+  const toDate = document.getElementById("leave-to").value;
+  const reason = document.getElementById("leave-reason").value;
+
+  const data = {
+    name: name,
+    leaveType: leaveType,
+    from: fromDate,
+    to: toDate,
+    reason: reason
+  };
+
+  fetch('https://script.google.com/macros/s/AKfycbwt0ZJtZUOAPKAr0aareFi9sT07kis64JgHV6z90k3roZI8y8C_vaKzuHV1YSovWkl3Yw/exec', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(response => {
+    if (response.ok) {
+      alert("تم إرسال طلب الإجازة بنجاح!");
+      closeLeaveForm(); // لو عندك دالة بتقفل الفورم
+    } else {
+      alert("حدث خطأ أثناء الإرسال.");
+    }
+  }).catch(error => {
+    alert("فشل الاتصال بالخادم: " + error);
+  });
+}
+
+
+
     </script>
   </body>
 </html>
