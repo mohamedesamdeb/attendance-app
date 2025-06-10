@@ -305,99 +305,132 @@
     </div>
 
     <div
-  id="leaveForm"
-  style="
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 2000;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-    padding: 20px;
-    width: 90vw;
-    max-width: 400px;
-    box-sizing: border-box;
-  "
->
-  <h3 style="text-align: center; margin-bottom: 15px">
-    📝 تقديم طلب إجازة
-  </h3>
-  <div id="leaveError" style="display:none; color: red; margin-bottom: 10px;"></div>
+      id="leaveForm"
+      style="
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2000;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        padding: 20px;
+        width: 90%;
+        max-width: 400px;
+      "
+    >
+      <h3 style="text-align: center; margin-bottom: 15px">
+        📝 تقديم طلب إجازة
+      </h3>
+      <div id="leaveError" style="display:none; color: red; margin-bottom: 10px;"></div>
 
-  <label for="leaveName">اسم الفني:</label>
-  <select
-    id="leaveName"
-    style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px;"
-  >
-    <option disabled selected>اختر اسم الفني</option>
-    <!-- باقي الأسماء -->
-  </select>
 
-  <label for="leaveOffice">المكتب:</label>
-  <select
-    id="leaveOffice"
-    style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px;"
-  >
-    <option disabled selected>اختر المكتب</option>
-    <option>شبرا</option>
-    <option>جسر السويس</option>
-    <option>المهندسين</option>
-  </select>
+      <label for="leaveName">اسم الفني:</label>
+      <select
+        id="leaveName"
+        style="width: 100%; padding: 10px; margin-bottom: 10px"
+      >
+        <option disabled selected>اختر اسم الفني</option>
+        <option>محمد عبده توفيق ابوزيد</option>
+        <option>مجدى عبد المجيد احمد عبدالرحمن</option>
+        <option>أحمد عزت عبدالعزيز ابراهيم</option>
+        <option>احمد على عبد الحافظ مرسى</option>
+        <option>ابراهيم حسنى عبده ابراهيم</option>
+        <option>فوزى محمد عبد الشافى مطيش</option>
+        <option>على حسن على</option>
+        <option>فريد ابراهيم عباس</option>
+        <option>حسين هلال حسين محمد</option>
+        <option>على احمد طنطاوى منصور</option>
+        <option>باسم نشأت صالح</option>
+        <option>سعيد حسين على</option>
+        <option>شادى رأفت رفاعي محمود صالح</option>
+        <option>محمد حسين محمد عامر</option>
+        <option>مصطفى محمود عبد النعيم عمار</option>
+        <option>محمود محمد عبدالحميد البليهى</option>
+        <option>مصطفي سامى مصطفي</option>
+        <option>رافت سيد عبد الشكور</option>
+        <option>بلال رمضان قطب حسن</option>
+        <option>هانى عبدالحميد احمد عبد الفتاح</option>
+        <option>محمد احمد احمد محمد احمد</option>
+        <option>ماجد حسين</option>
+        <option>نادر نجيب حنا يعقوب</option>
+        <option>ايمن جمال جرجس ابراهيم</option>
+        <option>هيثم مصطفى مصطفى عبد اللطيف</option>
+      </select>
 
-  <label for="leaveStartDate">تاريخ الإجازة من:</label>
-  <input
-    type="date"
-    id="leaveStartDate"
-    style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px;"
-  />
+      <label for="leaveOffice">المكتب:</label>
+      <select
+        id="leaveOffice"
+        style="width: 100%; padding: 10px; margin-bottom: 10px"
+      >
+        <option disabled selected>اختر المكتب</option>
+        <option>شبرا</option>
+        <option>جسر السويس</option>
+        <option>المهندسين</option>
+      </select>
 
-  <label for="leaveEndDate">تاريخ الإجازة إلى:</label>
-  <input
-    type="date"
-    id="leaveEndDate"
-    style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px;"
-  />
+      <label for="leaveDate"> تاريخ الإجازة من:</label>
+      <input
+        type="date"
+        id="leaveDate"
+        style="
+          width: 95%;
+          padding: 10px;
+          margin-bottom: 10px;
+          border-radius: 10px;
+        "
+      />
 
-  <label for="leaveReason">سبب الإجازة:</label>
-  <textarea
-    id="leaveReason"
-    placeholder="اكتب سبب الإجازة"
-    style="resize: none; width: 100%; padding: 10px; height: 80px; margin-bottom: 15px; border-radius: 8px;"
-  ></textarea>
+      <label for="leaveDate"> تاريخ الإجازة الي:</label>
+      <input
+        type="date"
+        id="leaveDate"
+        style="
+          width: 95%;
+          padding: 10px;
+          margin-bottom: 10px;
+          border-radius: 10px;
+        "
+      />
 
-  <button
-    onclick="submitLeaveRequest()"
-    style="
-      width: 100%;
-      padding: 12px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-    "
-  >
-    📨 تقديم الطلب
-  </button>
+      <label for="leaveReason">سبب الإجازة:</label>
+      <textarea
+        id="leaveReason"
+        placeholder="اكتب سبب الإجازة"
+        style="resize: none; width: 95%; padding: 10px; height: 80px; margin-bottom: 15px; border-radius: 10px;"
+      ></textarea>
 
-  <button
-    onclick="closeLeaveForm()"
-    style="
-      width: 100%;
-      padding: 10px;
-      background: none;
-      border: none;
-      color: #888;
-      margin-top: 10px;
-      font-size: 15px;
-    "
-  >
-    إغلاق
-  </button>
-</div>
+      <button
+        onclick="submitLeaveRequest()"
+        style="
+          width: 100%;
+          padding: 12px;
+          background-color: #28a745;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 16px;
+        "
+      >
+        📨 تقديم الطلب
+      </button>
+
+      <button
+        onclick="closeLeaveForm()"
+        style="
+          width: 100%;
+          padding: 10px;
+          background: none;
+          border: none;
+          color: #888;
+          margin-top: 10px;
+        "
+      >
+        إغلاق
+      </button>
+    </div>
 
     <div class="container">
       <h2>Trio-Telecom</h2>
