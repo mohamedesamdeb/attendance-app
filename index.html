@@ -1,447 +1,696 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🕒 تسجيل الحضور والانصراف</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <style>
-    /* نفس التنسيقات السابقة */
-    body {
-      margin: 0;
-      font-family: 'Tahoma', sans-serif;
-      background-color: #f1f1f1;
-      padding: 20px;
-      height: 100vh;
-      overflow-x: hidden;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🕒 تسجيل الحضور والانصراف</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      /* نفس التنسيقات السابقة */
+      body {
+        margin: 0;
+        font-family: "Tahoma", sans-serif;
+        background-color: #f1f1f1;
+        padding: 20px;
+        height: 100vh;
+        overflow-x: hidden;
+      }
 
-    .container {
-      max-width: 450px;
-      margin: auto;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      padding: 20px;
-      position: relative;
-    }
-
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 25px;
-    }
-
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #444;
-    }
-
-    select, button {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
-    button {
-      margin-top: 10px;
-      cursor: pointer;
-    }
-
-    .btn-location {
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-    }
-
-    .btn-attendance {
-      background-color: #28a745;
-      color: white;
-      border: none;
-    }
-
-    .btn-leave {
-      background-color: #dc3545;
-      color: white;
-      border: none;
-    }
-
-    #locationDisplay {
-      margin-top: 10px;
-      color: #666;
-      font-size: 14px;
-    }
-
-    #video {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 300px;
-      max-width: 90vw;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      z-index: 1000;
-      display: none;
-      background: black;
-    }
-
-    canvas {
-      display: none;
-    }
-
-    .warning-box {
-      margin-top: 20px;
-      background-color: #ffe6e6;
-      border: 1px solid #ff4d4d;
-      padding: 12px;
-      border-radius: 8px;
-      color: #b30000;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .warning-box ul {
-      padding-right: 15px;
-      margin: 8px 0 0 0;
-      list-style-type: disc;
-    }
-
-    #progressCircleContainer {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 9999;
-      display: none;
-      background: white;
-      border-radius: 50%;
-      padding: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-
-    /* أنماط القائمة الجانبية */
-    .sidebar-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #ffffff;
-      color: rgb(83, 83, 83);
-      border: none;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      font-size: 24px;
-      cursor: pointer;
-      z-index: 1000;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .sidebar {
-      position: fixed;
-      top: 0;
-      right: -500px;
-      width: 300px;
-      height: 100%;
-      background: #fff;
-      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-      z-index: 1000;
-      transition: right 0.9s ease;
-      padding: 20px;
-      overflow-y: auto;
-      border-radius: 20px;
-    }
-
-    .sidebar.active {
-      right: 0;
-    }
-
-    .sidebar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .sidebar-title {
-      font-size: 20px;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .close-sidebar {
-      background: #fff;
-      color: rgb(0, 0, 0);
-      border: none;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      font-size: 48px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .sidebar-content {
-      font-size: 16px;
-      line-height: 1.6;
-      color: #555;
-    }
-
-    @media (max-width: 500px) {
       .container {
-        padding: 15px;
+        max-width: 450px;
+        margin: auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        position: relative;
       }
 
       h2 {
-        font-size: 20px;
+        text-align: center;
+        color: #333;
+        margin-bottom: 25px;
       }
 
-      select, button {
-        font-size: 15px;
-        padding: 10px;
+      label {
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #444;
+      }
+
+      select,
+      button {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+      }
+
+      button {
+        margin-top: 10px;
+        cursor: pointer;
+      }
+
+      .btn-location {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+      }
+
+      .btn-attendance {
+        background-color: #28a745;
+        color: white;
+        border: none;
+      }
+
+      .btn-leave {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+      }
+
+      #locationDisplay {
+        margin-top: 10px;
+        color: #666;
+        font-size: 14px;
       }
 
       #video {
-        width: 90vw;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+        max-width: 90vw;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        display: none;
+        background: black;
       }
-      
+
+      canvas {
+        display: none;
+      }
+
+      .warning-box {
+        margin-top: 20px;
+        background-color: #ffe6e6;
+        border: 1px solid #ff4d4d;
+        padding: 12px;
+        border-radius: 8px;
+        color: #b30000;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .warning-box ul {
+        padding-right: 15px;
+        margin: 8px 0 0 0;
+        list-style-type: disc;
+      }
+
+      #progressCircleContainer {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+        display: none;
+        background: white;
+        border-radius: 50%;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      /* أنماط القائمة الجانبية */
+      .sidebar-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #ffffff;
+        color: rgb(83, 83, 83);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
       .sidebar {
-        width: 250px;
+        position: fixed;
+        top: 0;
         right: -500px;
+        width: 300px;
+        height: 100%;
+        background: #fff;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        transition: right 0.9s ease;
+        padding: 20px;
+        overflow-y: auto;
+        border-radius: 20px;
       }
-      
+
       .sidebar.active {
         right: 0;
       }
-    }
-  </style>
-</head>
-<body>
-  <video id="video" autoplay playsinline></video>
-  <canvas id="canvas" width="300" height="200"></canvas>
 
-  <div id="progressCircleContainer">
-    <svg id="progressCircle" width="120" height="120">
-      <circle cx="60" cy="60" r="50" stroke="#e6e6e6" stroke-width="10" fill="none"/>
-      <circle id="progressCircleBar" cx="60" cy="60" r="50" stroke="#28a745" stroke-width="10" fill="none"
-              stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="314" stroke-dashoffset="314"/>
-      <text id="progressText" x="60" y="68" text-anchor="middle" font-size="22" fill="#333">0%</text>
-    </svg>
-  </div>
-
-  <!-- زر فتح القائمة الجانبية -->
-  <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
-
-  <!-- القائمة الجانبية -->
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title">القائمة الجانبية</div>
-      <button class="close-sidebar" onclick="toggleSidebar()">×</button>
-    </div>
-    <div class="sidebar-content">
-      <p>هذه قائمة جانبية تحتوي على معلومات أو خيارات إضافية.</p>
-      <p>يمكنك إضافة أي محتوى نريجه هنا مثل:</p>
-      <ul>
-        <li>إعدادات التطبيق</li>
-        <li>روابط سريعة</li>
-        <li>معلومات المساعدة</li>
-        <li>سجل الحضور السابق</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="container">
-    <h2>Trio-Telecom</h2>
-    <h2>🕒 تسجيل الحضور والانصراف</h2>
-
-    <label for="technicianSelect">اسم الفني:</label>
-    <select id="technicianSelect">
-      <option disabled selected>اختر اسم الفني</option>
-      <option>محمد عبده توفيق ابوزيد</option>
-      <option>مجدى عبد المجيد احمد عبدالرحمن</option>
-      <option>أحمد عزت عبدالعزيز ابراهيم</option>
-      <option>احمد على عبد الحافظ مرسى</option>
-      <option>ابراهيم حسنى عبده ابراهيم</option>
-      <option>فوزى محمد عبد الشافى مطيش</option>
-      <option>على حسن على</option>
-      <option>فريد ابراهيم عباس</option>
-      <option>حسين هلال حسين محمد</option>
-      <option>على احمد طنطاوى منصور</option>
-      <option>باسم نشأت صالح</option>
-      <option>سعيد حسين على</option>
-      <option>شادى رأفت رفاعي محمود صالح</option>
-      <option>محمد حسين محمد عامر</option>
-      <option>مصطفى محمود عبد النعيم عمار</option>
-      <option>محمود محمد عبدالحميد البليهى</option>
-      <option>مصطفي سامى مصطفي</option>
-      <option>رافت سيد عبد الشكور</option>
-      <option>بلال رمضان قطب حسن</option>
-      <option>هانى عبدالحميد احمد عبد الفتاح</option>
-      <option>محمد احمد احمد محمد احمد</option>
-      <option>ماجد حسين</option>
-      <option>نادر نجيب حنا يعقوب</option>
-      <option>ايمن جمال جرجس ابراهيم</option>
-      <option>هيثم مصطفى مصطفى عبد اللطيف</option>
-    </select>
-
-    <label for="officeSelect">المكتب:</label>
-    <select id="officeSelect">
-      <option disabled selected>اختر المكتب</option>
-      <option>شبرا</option>
-      <option>جسر السويس</option>
-      <option>المهندسين</option>
-    </select>
-
-    <button class="btn-location" onclick="getLocation()">📍 تحديد موقعي</button>
-    <div id="locationDisplay">لم يتم تحديد الموقع</div>
-
-    <button class="btn-attendance" onclick="startProcess('حضور')">✅ تسجيل حضور</button>
-    <button class="btn-leave" onclick="startProcess('انصراف')">📤 تسجيل انصراف</button>
-
-    <div class="warning-box">
-      ⚠️ مهم جداً:
-      <ul>
-        <li>لازم الصورة تكون واضحة.</li>
-        <li>ركز وانت بتضغط تسجيل حضور أو انصراف.</li>
-        <li>لازم تضغط على زر تحديد الموقع.</li>
-        <li>إذا لم يتم تسجيل الحضور يتم تغيب الفني.</li>
-      </ul>
-      أي بند من الاربعة مش متطبق يتم احتساب تأخير.
-    </div>
-  </div>
-
-  <script>
-    let lat = "", lng = "";
-
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('active');
-    }
-
-    function getLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          lat = pos.coords.latitude.toFixed(6);
-          lng = pos.coords.longitude.toFixed(6);
-          document.getElementById("locationDisplay").textContent = `📍 الموقع الحالي: ${lat}, ${lng}`;
-        }, () => {
-          Swal.fire("⚠️", "فشل في تحديد الموقع", "warning");
-        });
-      } else {
-        Swal.fire("⚠️", "المتصفح لا يدعم تحديد الموقع", "warning");
-      }
-    }
-
-    async function startProcess(action) {
-      const name = document.getElementById("technicianSelect").value;
-      const office = document.getElementById("officeSelect").value;
-
-      if (!name || name === "اختر اسم الفني" || !office || office === "اختر المكتب") {
-        Swal.fire("تنبيه", "يرجى اختيار الفني والمكتب", "info");
-        return;
+      .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
       }
 
-      if (!lat || !lng) {
-        Swal.fire("تنبيه", "يرجى تحديد الموقع أولاً", "info");
-        return;
+      .sidebar-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
       }
 
-      const video = document.getElementById("video");
-      const canvas = document.getElementById("canvas");
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-        video.srcObject = stream;
-        video.style.display = "block";
-
-        setTimeout(() => {
-          canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-          const image = canvas.toDataURL('image/png');
-          stream.getTracks().forEach(track => track.stop());
-          video.style.display = "none";
-          sendData({ name, action, office, image });
-        }, 3000);
-
-      } catch (err) {
-        Swal.fire("⚠️", "فشل في تشغيل الكاميرا", "error");
+      .close-sidebar {
+        background: #fff;
+        color: rgb(0, 0, 0);
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        font-size: 48px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-    }
 
-    function sendData({ name, action, office, image }) {
-      const data = {
-        name, action, office,
-        time: new Date().toLocaleString('ar-EG'),
-        lat, lng, image
-      };
+      .sidebar-content {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #555;
+      }
 
-      const circleContainer = document.getElementById("progressCircleContainer");
-      const progressBar = document.getElementById("progressCircleBar");
-      const progressText = document.getElementById("progressText");
-
-      circleContainer.style.display = "block";
-      let percent = 0;
-
-      const interval = setInterval(() => {
-        if (percent < 90) {
-          percent++;
-          const offset = 314 - (314 * percent) / 100;
-          progressBar.setAttribute("stroke-dashoffset", offset);
-          progressText.textContent = `${percent}%`;
+      @media (max-width: 500px) {
+        .container {
+          padding: 15px;
         }
-      }, 50);
 
-      fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
-        method: "POST",
-        body: JSON.stringify(data)
-      })
-        .then(res => res.text())
-        .then(msg => {
-          clearInterval(interval);
-          let finalPercent = percent;
-          const complete = setInterval(() => {
-            if (finalPercent < 100) {
-              finalPercent++;
-              const offset = 314 - (314 * finalPercent) / 100;
-              progressBar.setAttribute("stroke-dashoffset", offset);
-              progressText.textContent = `${finalPercent}%`;
-            } else {
-              clearInterval(complete);
-              setTimeout(() => {
-                circleContainer.style.display = "none";
-                Swal.fire({
-                  icon: 'success',
-                  title: '✅ تم الإرسال بنجاح',
-                  confirmButtonText: 'OK'
-                }).then(() => {
-                  // تفريغ الحقول بعد الضغط OK
-                  document.getElementById("technicianSelect").selectedIndex = 0;
-                  document.getElementById("officeSelect").selectedIndex = 0;
-                  lat = "";
-                  lng = "";
-                  document.getElementById("locationDisplay").textContent = "لم يتم تحديد الموقع";
-                });
-              }, 300);
+        h2 {
+          font-size: 20px;
+        }
+
+        select,
+        button {
+          font-size: 15px;
+          padding: 10px;
+        }
+
+        #video {
+          width: 90vw;
+        }
+
+        .sidebar {
+          width: 250px;
+          right: -500px;
+        }
+
+        .sidebar.active {
+          right: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" width="300" height="200"></canvas>
+
+    <div id="progressCircleContainer">
+      <svg id="progressCircle" width="120" height="120">
+        <circle
+          cx="60"
+          cy="60"
+          r="50"
+          stroke="#e6e6e6"
+          stroke-width="10"
+          fill="none"
+        />
+        <circle
+          id="progressCircleBar"
+          cx="60"
+          cy="60"
+          r="50"
+          stroke="#28a745"
+          stroke-width="10"
+          fill="none"
+          stroke-linecap="round"
+          transform="rotate(-90 60 60)"
+          stroke-dasharray="314"
+          stroke-dashoffset="314"
+        />
+        <text
+          id="progressText"
+          x="60"
+          y="68"
+          text-anchor="middle"
+          font-size="22"
+          fill="#333"
+        >
+          0%
+        </text>
+      </svg>
+    </div>
+
+    <!-- زر فتح القائمة الجانبية -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+    <!-- القائمة الجانبية -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">القائمة الجانبية</div>
+        <button class="close-sidebar" onclick="toggleSidebar()">×</button>
+      </div>
+      <div class="sidebar-content">
+        <p>هذه قائمة جانبية تحتوي على معلومات أو خيارات إضافية.</p>
+        <p>يمكنك إضافة أي محتوى نريجه هنا مثل:</p>
+        <hr />
+        <button
+          onclick="openLeaveForm()"
+          style="
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+          "
+        >
+          📅 التقديم على طلب إجازة
+        </button>
+        <ul>
+          <li>إعدادات التطبيق</li>
+          <li>روابط سريعة</li>
+          <li>معلومات المساعدة</li>
+          <li>سجل الحضور السابق</li>
+        </ul>
+      </div>
+    </div>
+
+    <div
+      id="leaveForm"
+      style="
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2000;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        padding: 20px;
+        width: 90%;
+        max-width: 400px;
+      "
+    >
+      <h3 style="text-align: center; margin-bottom: 15px">
+        📝 تقديم طلب إجازة
+      </h3>
+      <div id="leaveError" style="display:none; color: red; margin-bottom: 10px;"></div>
+
+
+      <label for="leaveName">اسم الفني:</label>
+      <select
+        id="leaveName"
+        style="width: 100%; padding: 10px; margin-bottom: 10px"
+      >
+        <option disabled selected>اختر اسم الفني</option>
+        <option>أحمد علي</option>
+        <option>محمد مصطفى</option>
+        <option>سعيد عبد الله</option>
+        <option>شريف فوزي</option>
+        <option>كريم حسن</option>
+        <option>عمر محمود</option>
+        <option>فهد عبد الكريم</option>
+        <option>طارق محمد</option>
+        <option>هاني علاء</option>
+        <option>مصطفى يسري</option>
+        <option>إبراهيم سالم</option>
+        <option>مازن فهمي</option>
+        <option>خالد سيد</option>
+        <option>حسام حمدي</option>
+        <option>أمين عادل</option>
+        <option>بلال أشرف</option>
+        <option>يوسف سعيد</option>
+        <option>رضا أحمد</option>
+        <option>عصام عبد التواب</option>
+        <option>وليد مصطفى</option>
+        <option>مروان علي</option>
+        <option>علاء حسن</option>
+        <option>عمرو سمير</option>
+        <option>نادر محمد</option>
+        <option>هشام ناصر</option>
+      </select>
+
+      <label for="leaveOffice">المكتب:</label>
+      <select
+        id="leaveOffice"
+        style="width: 100%; padding: 10px; margin-bottom: 10px"
+      >
+        <option disabled selected>اختر المكتب</option>
+        <option>شبرا</option>
+        <option>جسر السويس</option>
+        <option>المهندسين</option>
+      </select>
+
+      <label for="leaveDate">تاريخ الإجازة:</label>
+      <input
+        type="date"
+        id="leaveDate"
+        style="
+          width: 95%;
+          padding: 10px;
+          margin-bottom: 10px;
+          border-radius: 10px;
+        "
+      />
+
+      <label for="leaveReason">سبب الإجازة:</label>
+      <textarea
+        id="leaveReason"
+        placeholder="اكتب سبب الإجازة"
+        style="resize: none; width: 95%; padding: 10px; height: 80px; margin-bottom: 15px; border-radius: 10px;"
+      ></textarea>
+
+      <button
+        onclick="submitLeaveRequest()"
+        style="
+          width: 100%;
+          padding: 12px;
+          background-color: #28a745;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 16px;
+        "
+      >
+        📨 تقديم الطلب
+      </button>
+
+      <button
+        onclick="closeLeaveForm()"
+        style="
+          width: 100%;
+          padding: 10px;
+          background: none;
+          border: none;
+          color: #888;
+          margin-top: 10px;
+        "
+      >
+        إغلاق
+      </button>
+    </div>
+
+    <div class="container">
+      <h2>Trio-Telecom</h2>
+      <h2>🕒 تسجيل الحضور والانصراف</h2>
+
+      <label for="technicianSelect">اسم الفني:</label>
+      <select id="technicianSelect">
+        <option disabled selected>اختر اسم الفني</option>
+        <option>محمد عبده توفيق ابوزيد</option>
+        <option>مجدى عبد المجيد احمد عبدالرحمن</option>
+        <option>أحمد عزت عبدالعزيز ابراهيم</option>
+        <option>احمد على عبد الحافظ مرسى</option>
+        <option>ابراهيم حسنى عبده ابراهيم</option>
+        <option>فوزى محمد عبد الشافى مطيش</option>
+        <option>على حسن على</option>
+        <option>فريد ابراهيم عباس</option>
+        <option>حسين هلال حسين محمد</option>
+        <option>على احمد طنطاوى منصور</option>
+        <option>باسم نشأت صالح</option>
+        <option>سعيد حسين على</option>
+        <option>شادى رأفت رفاعي محمود صالح</option>
+        <option>محمد حسين محمد عامر</option>
+        <option>مصطفى محمود عبد النعيم عمار</option>
+        <option>محمود محمد عبدالحميد البليهى</option>
+        <option>مصطفي سامى مصطفي</option>
+        <option>رافت سيد عبد الشكور</option>
+        <option>بلال رمضان قطب حسن</option>
+        <option>هانى عبدالحميد احمد عبد الفتاح</option>
+        <option>محمد احمد احمد محمد احمد</option>
+        <option>ماجد حسين</option>
+        <option>نادر نجيب حنا يعقوب</option>
+        <option>ايمن جمال جرجس ابراهيم</option>
+        <option>هيثم مصطفى مصطفى عبد اللطيف</option>
+      </select>
+
+      <label for="officeSelect">المكتب:</label>
+      <select id="officeSelect">
+        <option disabled selected>اختر المكتب</option>
+        <option>شبرا</option>
+        <option>جسر السويس</option>
+        <option>المهندسين</option>
+      </select>
+
+      <button class="btn-location" onclick="getLocation()">
+        📍 تحديد موقعي
+      </button>
+      <div id="locationDisplay">لم يتم تحديد الموقع</div>
+
+      <button class="btn-attendance" onclick="startProcess('حضور')">
+        ✅ تسجيل حضور
+      </button>
+      <button class="btn-leave" onclick="startProcess('انصراف')">
+        📤 تسجيل انصراف
+      </button>
+
+      <div class="warning-box">
+        ⚠️ مهم جداً:
+        <ul>
+          <li>لازم الصورة تكون واضحة.</li>
+          <li>ركز وانت بتضغط تسجيل حضور أو انصراف.</li>
+          <li>لازم تضغط على زر تحديد الموقع.</li>
+          <li>إذا لم يتم تسجيل الحضور يتم تغيب الفني.</li>
+        </ul>
+        أي بند من الاربعة مش متطبق يتم احتساب تأخير.
+      </div>
+    </div>
+
+    <script>
+      let lat = "",
+        lng = "";
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("active");
+      }
+
+      function getLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              lat = pos.coords.latitude.toFixed(6);
+              lng = pos.coords.longitude.toFixed(6);
+              document.getElementById(
+                "locationDisplay"
+              ).textContent = `📍 الموقع الحالي: ${lat}, ${lng}`;
+            },
+            () => {
+              Swal.fire("⚠️", "فشل في تحديد الموقع", "warning");
             }
-          }, 20);
-        })
-        .catch(err => {
-          clearInterval(interval);
-          circleContainer.style.display = "none";
-          Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
+          );
+        } else {
+          Swal.fire("⚠️", "المتصفح لا يدعم تحديد الموقع", "warning");
+        }
+      }
+
+      async function startProcess(action) {
+        const name = document.getElementById("technicianSelect").value;
+        const office = document.getElementById("officeSelect").value;
+
+        if (
+          !name ||
+          name === "اختر اسم الفني" ||
+          !office ||
+          office === "اختر المكتب"
+        ) {
+          Swal.fire("تنبيه", "يرجى اختيار الفني والمكتب", "info");
+          return;
+        }
+
+        if (!lat || !lng) {
+          Swal.fire("تنبيه", "يرجى تحديد الموقع أولاً", "info");
+          return;
+        }
+
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user" },
+          });
+          video.srcObject = stream;
+          video.style.display = "block";
+
+          setTimeout(() => {
+            canvas
+              .getContext("2d")
+              .drawImage(video, 0, 0, canvas.width, canvas.height);
+            const image = canvas.toDataURL("image/png");
+            stream.getTracks().forEach((track) => track.stop());
+            video.style.display = "none";
+            sendData({ name, action, office, image });
+          }, 3000);
+        } catch (err) {
+          Swal.fire("⚠️", "فشل في تشغيل الكاميرا", "error");
+        }
+      }
+
+      function sendData({ name, action, office, image }) {
+        const data = {
+          name,
+          action,
+          office,
+          time: new Date().toLocaleString("ar-EG"),
+          lat,
+          lng,
+          image,
+        };
+
+        const circleContainer = document.getElementById(
+          "progressCircleContainer"
+        );
+        const progressBar = document.getElementById("progressCircleBar");
+        const progressText = document.getElementById("progressText");
+
+        circleContainer.style.display = "block";
+        let percent = 0;
+
+        const interval = setInterval(() => {
+          if (percent < 90) {
+            percent++;
+            const offset = 314 - (314 * percent) / 100;
+            progressBar.setAttribute("stroke-dashoffset", offset);
+            progressText.textContent = `${percent}%`;
+          }
+        }, 50);
+
+        fetch(
+          "https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec",
+          {
+            method: "POST",
+            body: JSON.stringify(data),
+          }
+        )
+          .then((res) => res.text())
+          .then((msg) => {
+            clearInterval(interval);
+            let finalPercent = percent;
+            const complete = setInterval(() => {
+              if (finalPercent < 100) {
+                finalPercent++;
+                const offset = 314 - (314 * finalPercent) / 100;
+                progressBar.setAttribute("stroke-dashoffset", offset);
+                progressText.textContent = `${finalPercent}%`;
+              } else {
+                clearInterval(complete);
+                setTimeout(() => {
+                  circleContainer.style.display = "none";
+                  Swal.fire({
+                    icon: "success",
+                    title: "✅ تم الإرسال بنجاح",
+                    confirmButtonText: "OK",
+                  }).then(() => {
+                    // تفريغ الحقول بعد الضغط OK
+                    document.getElementById(
+                      "technicianSelect"
+                    ).selectedIndex = 0;
+                    document.getElementById("officeSelect").selectedIndex = 0;
+                    lat = "";
+                    lng = "";
+                    document.getElementById("locationDisplay").textContent =
+                      "لم يتم تحديد الموقع";
+                  });
+                }, 300);
+              }
+            }, 20);
+          })
+          .catch((err) => {
+            clearInterval(interval);
+            circleContainer.style.display = "none";
+            Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
+          });
+      }
+
+      function openLeaveForm() {
+        document.getElementById("leaveForm").style.display = "block";
+      }
+
+      function closeLeaveForm() {
+        document.getElementById("leaveForm").style.display = "none";
+      }
+
+      function submitLeaveRequest() {
+        const name = document.getElementById("leaveName").value;
+        const office = document.getElementById("leaveOffice").value;
+        const date = document.getElementById("leaveDate").value;
+        const reason = document.getElementById("leaveReason").value;
+
+        if (
+  !name ||
+  name === "اختر اسم الفني" ||
+  !office ||
+  office === "اختر المكتب" ||
+  !date ||
+  !reason
+) {
+  const errorBox = document.getElementById("leaveError");
+  errorBox.textContent = "يرجى تعبئة جميع الحقول";
+  errorBox.style.display = "block";
+  return;
+}
+
+
+        // هنا ممكن تضيف الكود الخاص بإرسال البيانات إلى جوجل شيت مثلاً
+
+        document.getElementById("leaveForm").style.display = "none";
+
+        Swal.fire({
+          icon: "success",
+          title: "تم إرسال الطلب بنجاح",
+          showConfirmButton: false,
+          timer: 2500,
+        }).then(() => {
+          // إغلاق نموذج الإجازة
+
+          // تفريغ الحقول (اختياري)
+          document.getElementById("leaveName").selectedIndex = 0;
+          document.getElementById("leaveOffice").selectedIndex = 0;
+          document.getElementById("leaveDate").value = "";
+          document.getElementById("leaveReason").value = "";
         });
-    }
-  </script>
-</body>
+      }
+
+      // إغلاق القائمة الجانبية لما يتم الضغط على أي زر داخلها
+document.querySelectorAll("#sidebar button").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.getElementById("sidebar").classList.remove("active");
+  });
+});
+    </script>
+  </body>
 </html>
