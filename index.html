@@ -625,7 +625,7 @@
 }
 
 
-      function sendData({ name, action, office, image }) {
+      function sendData({ name, action, office, image, leaveReason = "" }) {
         const data = {
           name,
           action,
@@ -634,6 +634,7 @@
           lat,
           lng,
           image,
+          leaveReason
         };
 
         const circleContainer = document.getElementById(
