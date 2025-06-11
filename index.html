@@ -200,6 +200,15 @@
         color: #555;
       }
 
+      /* جعل قائمة SweetAlert select متجاوبة */
+.swal2-select {
+  width: 90% !important;
+  max-width: 90%;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+
       @media (max-width: 500px) {
         .container {
           padding: 15px;
@@ -566,7 +575,7 @@
     const hour = now.getHours();
     const minute = now.getMinutes();
 
-    if (hour < 11 || (hour === 11 && minute < 55)) {
+    if (hour < 13 || (hour === 13 && minute < 00)) {
       const { value: reason } = await Swal.fire({
         title: "🚨 انصراف مبكر",
         text: "برجاء اختيار سبب الانصراف المبكر:",
