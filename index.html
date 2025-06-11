@@ -526,30 +526,35 @@
       </div>
     </div>
 
-  let lat = "", lng = "";
+    <script>
+      let lat = "",
+        lng = "";
 
-function toggleSidebar() {
-  document.getElementById("sidebar").classList.toggle("active");
-}
-
-function getLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        lat = pos.coords.latitude.toFixed(6);
-        lng = pos.coords.longitude.toFixed(6);
-        document.getElementById("locationDisplay").textContent = `📍 الموقع الحالي: ${lat}, ${lng}`;
-      },
-      () => {
-        Swal.fire("⚠️", "فشل في تحديد الموقع", "warning");
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("active");
       }
-    );
-  } else {
-    Swal.fire("⚠️", "المتصفح لا يدعم تحديد الموقع", "warning");
-  }
-}
 
-async function startProcess(action) {
+      function getLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              lat = pos.coords.latitude.toFixed(6);
+              lng = pos.coords.longitude.toFixed(6);
+              document.getElementById(
+                "locationDisplay"
+              ).textContent = `📍 الموقع الحالي: ${lat}, ${lng}`;
+            },
+            () => {
+              Swal.fire("⚠️", "فشل في تحديد الموقع", "warning");
+            }
+          );
+        } else {
+          Swal.fire("⚠️", "المتصفح لا يدعم تحديد الموقع", "warning");
+        }
+      }
+
+      async function startProcess(action) {
   const name = document.getElementById("technicianSelect").value;
   const office = document.getElementById("officeSelect").value;
 
@@ -563,6 +568,7 @@ async function startProcess(action) {
     return;
   }
 
+  // 👇 تحقق من وقت الانصراف المبكر
   let leaveReason = "";
   if (action === "انصراف") {
     const now = new Date();
@@ -593,6 +599,7 @@ async function startProcess(action) {
     }
   }
 
+  // ✅ تصوير من الكاميرا
   const video = document.getElementById("video");
   const canvas = document.getElementById("canvas");
 
@@ -609,6 +616,7 @@ async function startProcess(action) {
       stream.getTracks().forEach((track) => track.stop());
       video.style.display = "none";
 
+      // 👉 إرسال البيانات مع السبب
       sendData({ name, action, office, image, leaveReason });
     }, 3000);
   } catch (err) {
@@ -616,75 +624,138 @@ async function startProcess(action) {
   }
 }
 
-function sendData({ name, action, office, image, leaveReason = "" }) {
-  const data = {
-    name,
-    action,
-    office,
-    time: new Date().toLocaleString("ar-EG"),
-    lat,
-    lng,
-    image,
-    leaveReason,
-  };
 
-  const circleContainer = document.getElementById("progressCircleContainer");
-  const progressBar = document.getElementById("progressCircleBar");
-  const progressText = document.getElementById("progressText");
+      function sendData({ name, action, office, image }) {
+        const data = {
+          name,
+          action,
+          office,
+          time: new Date().toLocaleString("ar-EG"),
+          lat,
+          lng,
+          image,
+        };
 
-  circleContainer.style.display = "block";
-  let percent = 0;
+        const circleContainer = document.getElementById(
+          "progressCircleContainer"
+        );
+        const progressBar = document.getElementById("progressCircleBar");
+        const progressText = document.getElementById("progressText");
 
-  const interval = setInterval(() => {
-    if (percent < 90) {
-      percent++;
-      const offset = 314 - (314 * percent) / 100;
-      progressBar.setAttribute("stroke-dashoffset", offset);
-      progressText.textContent = `${percent}%`;
-    }
-  }, 50);
+        circleContainer.style.display = "block";
+        let percent = 0;
 
-  fetch("https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec", {
-    method: "POST",
-    body: JSON.stringify(data),
-  })
-    .then((res) => res.text())
-    .then((msg) => {
-      clearInterval(interval);
-      let finalPercent = percent;
-      const complete = setInterval(() => {
-        if (finalPercent < 100) {
-          finalPercent++;
-          const offset = 314 - (314 * finalPercent) / 100;
-          progressBar.setAttribute("stroke-dashoffset", offset);
-          progressText.textContent = `${finalPercent}%`;
-        } else {
-          clearInterval(complete);
-          setTimeout(() => {
+        const interval = setInterval(() => {
+          if (percent < 90) {
+            percent++;
+            const offset = 314 - (314 * percent) / 100;
+            progressBar.setAttribute("stroke-dashoffset", offset);
+            progressText.textContent = `${percent}%`;
+          }
+        }, 50);
+
+        fetch(
+          "https://script.google.com/macros/s/AKfycbwcZZ7i7EPEGl3zLJ_ocU5Fh1BLjz6fmgujq8fL4GsgR1n0bwuQn7I3YMOi2ksLCj2LLw/exec",
+          {
+            method: "POST",
+            body: JSON.stringify(data),
+          }
+        )
+          .then((res) => res.text())
+          .then((msg) => {
+            clearInterval(interval);
+            let finalPercent = percent;
+            const complete = setInterval(() => {
+              if (finalPercent < 100) {
+                finalPercent++;
+                const offset = 314 - (314 * finalPercent) / 100;
+                progressBar.setAttribute("stroke-dashoffset", offset);
+                progressText.textContent = `${finalPercent}%`;
+              } else {
+                clearInterval(complete);
+                setTimeout(() => {
+                  circleContainer.style.display = "none";
+                  Swal.fire({
+                    icon: "success",
+                    title: "✅ تم الإرسال بنجاح",
+                    confirmButtonText: "OK",
+                  }).then(() => {
+                    // تفريغ الحقول بعد الضغط OK
+                    document.getElementById(
+                      "technicianSelect"
+                    ).selectedIndex = 0;
+                    document.getElementById("officeSelect").selectedIndex = 0;
+                    lat = "";
+                    lng = "";
+                    document.getElementById("locationDisplay").textContent =
+                      "لم يتم تحديد الموقع";
+                  });
+                }, 300);
+              }
+            }, 20);
+          })
+          .catch((err) => {
+            clearInterval(interval);
             circleContainer.style.display = "none";
-            Swal.fire({
-              icon: "success",
-              title: "✅ تم الإرسال بنجاح",
-              confirmButtonText: "OK",
-            }).then(() => {
-              document.getElementById("technicianSelect").selectedIndex = 0;
-              document.getElementById("officeSelect").selectedIndex = 0;
-              lat = "";
-              lng = "";
-              document.getElementById("locationDisplay").textContent = "لم يتم تحديد الموقع";
-            });
-          }, 300);
-        }
-      }, 20);
-    })
-    .catch((err) => {
-      clearInterval(interval);
-      circleContainer.style.display = "none";
-      Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
-    });
+            Swal.fire("❌ خطأ", "فشل في إرسال البيانات", "error");
+          });
+      }
+
+      function openLeaveForm() {
+        document.getElementById("leaveForm").style.display = "block";
+      }
+
+      function closeLeaveForm() {
+        document.getElementById("leaveForm").style.display = "none";
+      }
+
+      function submitLeaveRequest() {
+        const name = document.getElementById("leaveName").value;
+        const office = document.getElementById("leaveOffice").value;
+        const date = document.getElementById("leaveDate").value;
+        const reason = document.getElementById("leaveReason").value;
+
+        if (
+  !name ||
+  name === "اختر اسم الفني" ||
+  !office ||
+  office === "اختر المكتب" ||
+  !date ||
+  !reason
+) {
+  const errorBox = document.getElementById("leaveError");
+  errorBox.textContent = "يرجى تعبئة جميع الحقول";
+  errorBox.style.display = "block";
+  return;
 }
-</script>
 
 
+        // هنا ممكن تضيف الكود الخاص بإرسال البيانات إلى جوجل شيت مثلاً
+
+        document.getElementById("leaveForm").style.display = "none";
+
+        Swal.fire({
+          icon: "success",
+          title: "تم إرسال الطلب بنجاح",
+          showConfirmButton: false,
+          timer: 2500,
+        }).then(() => {
+          // إغلاق نموذج الإجازة
+
+          // تفريغ الحقول (اختياري)
+          document.getElementById("leaveName").selectedIndex = 0;
+          document.getElementById("leaveOffice").selectedIndex = 0;
+          document.getElementById("leaveDate").value = "";
+          document.getElementById("leaveReason").value = "";
+        });
+      }
+
+      // إغلاق القائمة الجانبية لما يتم الضغط على أي زر داخلها
+document.querySelectorAll("#sidebar button").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.getElementById("sidebar").classList.remove("active");
+  });
+});
+    </script>
   </body>
 </html>
