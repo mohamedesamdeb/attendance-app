@@ -575,35 +575,25 @@
     const hour = now.getHours();
     const minute = now.getMinutes();
 
-    if (hour < 16 || (hour === 16 && minute < 30)) {
-      const { isConfirmed, value } = await Swal.fire({
-  title: "🚨 انصراف مبكر",
-  text: "برجاء اختيار سبب الانصراف المبكر:",
-  input: "select",
-  inputOptions: {
-    "": "— اختر السبب —",  // مهم جدًا عشان يشتغل مظبوط
-    "حالة طارئة": "حالة طارئة",
-    "انتهاء العمل مبكر": "انتهاء العمل مبكر",
-    "تم حضور زميلي و تسليمه مبكر": "تم حضور زميلي و تسليمه مبكر"
-  },
-  inputPlaceholder: "اختر السبب",
-  showCancelButton: true,
-  confirmButtonText: "تأكيد",
-  inputValidator: (value) => {
-    if (!value) {
-      return "يجب اختيار سبب الانصراف";
-    }
-  }
-});
+    if (hour < 8 || (hour === 8 && minute < 30)) {
+      const { value: reason } = await Swal.fire({
+        title: "🚨 انصراف مبكر",
+        text: "برجاء اختيار سبب الانصراف المبكر:",
+        input: "select",
+        inputOptions: {
+          "حالة طارئة": "حالة طارئة",
+          "انتهاء العمل مبكر": "انتهاء العمل مبكر",
+          "تم حضور زميلي و تسليمه مبكر": "تم حضور زميلي و تسليمه مبكر"
+        },
+        inputPlaceholder: "اختر السبب",
+        showCancelButton: true,
+        confirmButtonText: "تأكيد"
+      });
 
-
-      if (!isConfirmed) {
-  Swal.fire("تم الإلغاء", "لم يتم تسجيل الانصراف", "info");
-  return;
-}
-
-leaveReason = value;
-
+      if (!reason) {
+        Swal.fire("تم الإلغاء", "لم يتم تسجيل الانصراف", "info");
+        return;
+      }
 
       leaveReason = reason;
     }
@@ -635,7 +625,7 @@ leaveReason = value;
 }
 
 
-      function sendData({ name, action, office, image, leaveReason = "" }) {
+      function sendData({ name, action, office, image }) {
         const data = {
           name,
           action,
@@ -644,7 +634,6 @@ leaveReason = value;
           lat,
           lng,
           image,
-          leaveReason
         };
 
         const circleContainer = document.getElementById(
@@ -770,3 +759,4 @@ document.querySelectorAll("#sidebar button").forEach((btn) => {
     </script>
   </body>
 </html>
+
