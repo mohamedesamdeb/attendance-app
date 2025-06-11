@@ -546,47 +546,75 @@
       }
 
       async function startProcess(action) {
-        const name = document.getElementById("technicianSelect").value;
-        const office = document.getElementById("officeSelect").value;
+  const name = document.getElementById("technicianSelect").value;
+  const office = document.getElementById("officeSelect").value;
 
-        if (
-          !name ||
-          name === "اختر اسم الفني" ||
-          !office ||
-          office === "اختر المكتب"
-        ) {
-          Swal.fire("تنبيه", "يرجى اختيار الفني والمكتب", "info");
-          return;
-        }
+  if (!name || name === "اختر اسم الفني" || !office || office === "اختر المكتب") {
+    Swal.fire("تنبيه", "يرجى اختيار الفني والمكتب", "info");
+    return;
+  }
 
-        if (!lat || !lng) {
-          Swal.fire("تنبيه", "يرجى تحديد الموقع أولاً", "info");
-          return;
-        }
+  if (!lat || !lng) {
+    Swal.fire("تنبيه", "يرجى تحديد الموقع أولاً", "info");
+    return;
+  }
 
-        const video = document.getElementById("video");
-        const canvas = document.getElementById("canvas");
+  // 👇 تحقق من وقت الانصراف المبكر
+  let leaveReason = "";
+  if (action === "انصراف") {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
 
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user" },
-          });
-          video.srcObject = stream;
-          video.style.display = "block";
+    if (hour < 11 || (hour === 11 && minute < 55)) {
+      const { value: reason } = await Swal.fire({
+        title: "🚨 انصراف مبكر",
+        text: "برجاء اختيار سبب الانصراف المبكر:",
+        input: "select",
+        inputOptions: {
+          "حالة طارئة": "حالة طارئة",
+          "انتهاء العمل مبكر": "انتهاء العمل مبكر",
+          "تم حضور زميلي و تسليمه مبكر": "تم حضور زميلي و تسليمه مبكر"
+        },
+        inputPlaceholder: "اختر السبب",
+        showCancelButton: true,
+        confirmButtonText: "تأكيد"
+      });
 
-          setTimeout(() => {
-            canvas
-              .getContext("2d")
-              .drawImage(video, 0, 0, canvas.width, canvas.height);
-            const image = canvas.toDataURL("image/png");
-            stream.getTracks().forEach((track) => track.stop());
-            video.style.display = "none";
-            sendData({ name, action, office, image });
-          }, 3000);
-        } catch (err) {
-          Swal.fire("⚠️", "فشل في تشغيل الكاميرا", "error");
-        }
+      if (!reason) {
+        Swal.fire("تم الإلغاء", "لم يتم تسجيل الانصراف", "info");
+        return;
       }
+
+      leaveReason = reason;
+    }
+  }
+
+  // ✅ تصوير من الكاميرا
+  const video = document.getElementById("video");
+  const canvas = document.getElementById("canvas");
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user" },
+    });
+    video.srcObject = stream;
+    video.style.display = "block";
+
+    setTimeout(() => {
+      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+      const image = canvas.toDataURL("image/png");
+      stream.getTracks().forEach((track) => track.stop());
+      video.style.display = "none";
+
+      // 👉 إرسال البيانات مع السبب
+      sendData({ name, action, office, image, leaveReason });
+    }, 3000);
+  } catch (err) {
+    Swal.fire("⚠️", "فشل في تشغيل الكاميرا", "error");
+  }
+}
+
 
       function sendData({ name, action, office, image }) {
         const data = {
