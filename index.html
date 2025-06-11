@@ -526,7 +526,7 @@
       </div>
     </div>
 
-   <script>
+  <script>
   let lat = "", lng = "";
 
   function toggleSidebar() {
@@ -571,7 +571,7 @@
       const hour = now.getHours();
       const minute = now.getMinutes();
 
-      if (hour < 13 || (hour === 13 && minute < 30)) {
+      if (hour < 8 || (hour === 8 && minute < 30)) {
         const { value: reason } = await Swal.fire({
           title: "🚨 انصراف مبكر",
           text: "برجاء اختيار سبب الانصراف المبكر:",
@@ -627,7 +627,7 @@
       lat,
       lng,
       image,
-      leaveReason,
+      leaveReason, // 👈 تم الإرسال
     };
 
     const circleContainer = document.getElementById("progressCircleContainer");
@@ -689,6 +689,7 @@
       });
   }
 
+  // فتح وإغلاق نموذج طلب الإجازة
   function openLeaveForm() {
     document.getElementById("leaveForm").style.display = "block";
   }
@@ -710,8 +711,6 @@
       return;
     }
 
-    // هنا ممكن تضيف الكود الخاص بإرسال الطلب للشيت
-
     document.getElementById("leaveForm").style.display = "none";
 
     Swal.fire({
@@ -727,7 +726,7 @@
     });
   }
 
-  // إغلاق القائمة الجانبية لما يتم الضغط على أي زر
+  // إغلاق القائمة الجانبية عند الضغط على أي زر فيها
   document.querySelectorAll("#sidebar button").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.getElementById("sidebar").classList.remove("active");
