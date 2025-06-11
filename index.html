@@ -619,16 +619,16 @@
   }
 
   function sendData({ name, action, office, image, leaveReason = "" }) {
-    const data = {
-      name,
-      action,
-      office,
-      time: new Date().toLocaleString("ar-EG"),
-      lat,
-      lng,
-      image,
-      leaveReason, // 👈 تم الإرسال
-    };
+  const data = {
+    name,
+    action,
+    office,
+    time: new Date().toLocaleString("ar-EG"),
+    lat,
+    lng,
+    image,
+    leaveReason,
+  };
 
     const circleContainer = document.getElementById("progressCircleContainer");
     const progressBar = document.getElementById("progressCircleBar");
