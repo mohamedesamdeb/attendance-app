@@ -537,57 +537,36 @@
       }
 
       function getLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        let lat = pos.coords.latitude.toFixed(6);
-        let lng = pos.coords.longitude.toFixed(6);
-        document.getElementById("locationDisplay").textContent =
-          `📍 الموقع الحالي: ${lat}, ${lng}`;
-      },
-      (err) => {
-        let message = "فشل في تحديد الموقع";
-        let showRetry = false;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          // تعريف المتغيرات بشكل صحيح
+          let lat = pos.coords.latitude.toFixed(6);
+          let lng = pos.coords.longitude.toFixed(6);
 
-        if (err.code === 1) {
-          message = "🚫 تم رفض الإذن بتحديد الموقع";
-          showRetry = true;
-        } else if (err.code === 2) {
-          message = "📡 لا يمكن تحديد الموقع حاليًا";
-        } else if (err.code === 3) {
-          message = "⏱️ انتهت مهلة تحديد الموقع";
-          showRetry = true;
-        }
+          // عرض النتيجة في الصفحة
+          document.getElementById("locationDisplay").textContent =
+            `📍 الموقع الحالي: ${lat}, ${lng}`;
+        },
+        (err) => {
+          // التعامل مع أنواع الأخطاء المختلفة
+          let message = "فشل في تحديد الموقع";
+          if (err.code === 1) message = "🚫 تم رفض الإذن بتحديد الموقع";
+          else if (err.code === 2) message = "📡 لا يمكن تحديد الموقع حاليًا";
+          else if (err.code === 3) message = "⏱️ انتهت مهلة تحديد الموقع";
 
-        if (showRetry) {
-          Swal.fire({
-            title: "⚠️",
-            text: message,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "🔁 السماح بتحديد الموقع",
-            cancelButtonText: "إلغاء"
-          }).then((result) => {
-            if (result.isConfirmed) {
-              // إعادة المحاولة
-              getLocation();
-            }
-          });
-        } else {
           Swal.fire("⚠️", message, "warning");
+        },
+        {
+          enableHighAccuracy: true, // يطلب تحديد دقيق من GPS
+          timeout: 10000,           // يمهل 10 ثواني بس
+          maximumAge: 0             // مايعتمدش على موقع قديم
         }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-    );
-  } else {
-    Swal.fire("⚠️", "المتصفح لا يدعم تحديد الموقع", "warning");
+      );
+    } else {
+      Swal.fire("⚠️", "المتصفح لا يدعم تحديد الموقع", "warning");
+    }
   }
-}
-
 
       async function startProcess(action) {
   const name = document.getElementById("technicianSelect").value;
