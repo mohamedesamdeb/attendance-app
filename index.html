@@ -349,22 +349,25 @@
     </div>
 
     <div
-      id="leaveForm"
-      style="
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 2000;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-        padding: 20px;
-        width: 90%;
-        max-width: 400px;
-      "
-    >
+  id="leaveForm"
+  style="
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+  "
+>
+
       <h3 style="text-align: center; margin-bottom: 15px">
         📝 تقديم طلب إجازة
       </h3>
@@ -739,53 +742,56 @@
       }
 
       function submitLeaveRequest() {
-        const name = document.getElementById("leaveName").value;
-        const office = document.getElementById("leaveOffice").value;
-        const date = document.getElementById("leaveDate").value;
-        const reason = document.getElementById("leaveReason").value;
+  const name = document.getElementById("leaveName").value;
+  const office = document.getElementById("leaveOffice").value;
+  const dateFrom = document.getElementById("leaveDateFrom").value;
+  const dateTo = document.getElementById("leaveDateTo").value;
+  const reason = document.getElementById("leaveReason").value;
 
-        if (
-  !name ||
-  name === "اختر اسم الفني" ||
-  !office ||
-  office === "اختر المكتب" ||
-  !date ||
-  !reason
-) {
-  const errorBox = document.getElementById("leaveError");
-  errorBox.textContent = "يرجى تعبئة جميع الحقول";
-  errorBox.style.display = "block";
-  return;
+  if (!name || name === "اختر اسم الفني" ||
+      !office || office === "اختر المكتب" ||
+      !dateFrom || !dateTo || !reason) {
+    const errorBox = document.getElementById("leaveError");
+    errorBox.textContent = "يرجى تعبئة جميع الحقول";
+    errorBox.style.display = "block";
+    return;
+  }
+
+  const data = {
+    name,
+    office,
+    dateFrom,
+    dateTo,
+    reason,
+    timestamp: new Date().toLocaleString("ar-EG")
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbyD9r5J5YO4aQFg5WLW4ThgZkJ0l3brj8da5A0vCiT2nXE5x6oEH6AAjKqwxa1phcdv8Q/exec", {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(res => res.text())
+  .then(res => {
+    document.getElementById("leaveForm").style.display = "none";
+    Swal.fire({
+      icon: "success",
+      title: "تم إرسال الطلب بنجاح",
+      showConfirmButton: false,
+      timer: 2500,
+    });
+
+    // تفريغ الحقول
+    document.getElementById("leaveName").selectedIndex = 0;
+    document.getElementById("leaveOffice").selectedIndex = 0;
+    document.getElementById("leaveDateFrom").value = "";
+    document.getElementById("leaveDateTo").value = "";
+    document.getElementById("leaveReason").value = "";
+  })
+  .catch(err => {
+    Swal.fire("❌ خطأ", "فشل في إرسال الطلب", "error");
+  });
 }
 
-
-        // هنا ممكن تضيف الكود الخاص بإرسال البيانات إلى جوجل شيت مثلاً
-
-        document.getElementById("leaveForm").style.display = "none";
-
-        Swal.fire({
-          icon: "success",
-          title: "تم إرسال الطلب بنجاح",
-          showConfirmButton: false,
-          timer: 2500,
-        }).then(() => {
-          // إغلاق نموذج الإجازة
-
-          // تفريغ الحقول (اختياري)
-          document.getElementById("leaveName").selectedIndex = 0;
-          document.getElementById("leaveOffice").selectedIndex = 0;
-          document.getElementById("leaveDate").value = "";
-          document.getElementById("leaveReason").value = "";
-        });
-      }
-
-      // إغلاق القائمة الجانبية لما يتم الضغط على أي زر داخلها
-document.querySelectorAll("#sidebar button").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.getElementById("sidebar").classList.remove("active");
-  });
-});
     </script>
   </body>
 </html>
-
