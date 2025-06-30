@@ -338,6 +338,22 @@
  تسكين الهوندا ⏱ 
         </button>
 
+        <button onclick="openLeaveStatus()"
+  style="
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    background-color: #ffc107;
+    color: black;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;">
+  🗂️ طلباتي السابقة
+</button>
+
+
+
 
         <ul>
           <li>إعدادات التطبيق</li>
@@ -480,6 +496,64 @@
     </div>
 
     <div class="container">
+
+<div id="leaveStatusPopup" style="
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3000;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 95%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+">
+  <h3 style="text-align:center;">📋 طلبات الإجازة السابقة</h3>
+  
+  <label for="leaveStatusName">اسم الفني:</label>
+  <select id="leaveStatusName" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+    <option disabled selected>اختر اسم الفني</option>
+    <option>محمد عبده توفيق ابوزيد</option>
+    <option>مجدى عبد المجيد احمد عبدالرحمن</option>
+    <option>أحمد عزت عبدالعزيز ابراهيم</option>
+    <option>احمد على عبد الحافظ مرسى</option>
+    <option>ابراهيم حسنى عبده ابراهيم</option>
+    <option>فوزى محمد عبد الشافى مطيش</option>
+    <option>على حسن على</option>
+    <option>فريد ابراهيم عباس</option>
+    <option>حسين هلال حسين محمد</option>
+    <option>على احمد طنطاوى منصور</option>
+    <option>باسم نشأت صالح</option>
+    <option>سعيد حسين على</option>
+    <option>شادى رأفت رفاعي محمود صالح</option>
+    <option>محمد حسين محمد عامر</option>
+    <option>مصطفى محمود عبد النعيم عمار</option>
+    <option>محمود محمد عبدالحميد البليهى</option>
+    <option>مصطفي سامى مصطفي</option>
+    <option>رافت سيد عبد الشكور</option>
+    <option>بلال رمضان قطب حسن</option>
+    <option>هانى عبدالحميد احمد عبد الفتاح</option>
+    <option>محمد احمد احمد محمد احمد</option>
+    <option>ماجد حسين</option>
+    <option>نادر نجيب حنا يعقوب</option>
+    <option>ايمن جمال جرجس ابراهيم</option>
+    <option>هيثم مصطفى مصطفى عبد اللطيف</option>
+  </select>
+
+  <div id="leaveStatusResult" style="text-align: center; margin-top: 10px;">
+  <!-- هنا هيظهر الانتظار -->
+</div>
+
+
+  <button onclick="closeLeaveStatus()" style="margin-top: 10px; background:red; color:white; border:none; padding:10px; width:100%; border-radius:8px;">إغلاق</button>
+</div>
+
+
       <h2>Trio-Telecom</h2>
       <h2>🕒 تسجيل الحضور والانصراف</h2>
 
@@ -791,6 +865,76 @@
     Swal.fire("❌ خطأ", "فشل في إرسال الطلب", "error");
   });
 }
+
+function openLeaveStatus() {
+  document.getElementById("leaveStatusPopup").style.display = "block";
+}
+
+function closeLeaveStatus() {
+  document.getElementById("leaveStatusPopup").style.display = "none";
+  document.getElementById("leaveStatusResult").innerHTML = "";
+  document.getElementById("leaveStatusName").selectedIndex = 0;
+}
+
+document.getElementById("leaveStatusName").addEventListener("change", () => {
+  const name = document.getElementById("leaveStatusName").value;
+  
+  // ✅ عرض جاري التحميل
+  document.getElementById("leaveStatusResult").innerHTML = `
+    <div style="text-align:center; padding:10px;">
+      ⏳ جاري تحميل الطلبات...
+    </div>`;
+
+  fetch(`https://script.google.com/macros/s/AKfycbzjZ30q0NR58A7rQI_lnCtkxbQOuPRMYnM2j81077ja4T5V440V-RSBsGnH7YyIAKOgxA/exec?name=${encodeURIComponent(name)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.length === 0) {
+        document.getElementById("leaveStatusResult").innerHTML = "<p>لا توجد طلبات.</p>";
+        return;
+      }
+
+      // ✅ استخدام formatDate لتحويل التاريخ
+      const formatDate = (isoString) => {
+        const date = new Date(isoString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+      };
+
+      let html = `<table style="width:100%; border-collapse: collapse;">
+        <tr>
+          <th style="border-bottom: 1px solid #ccc;">من</th>
+          <th style="border-bottom: 1px solid #ccc;">إلى</th>
+          <th style="border-bottom: 1px solid #ccc;">السبب</th>
+          <th style="border-bottom: 1px solid #ccc;">الحالة</th>
+        </tr>`;
+
+      data.forEach(row => {
+        const color = row.status === "موافق" ? "green" :
+                      row.status === "مرفوض" ? "red" : "orange";
+        html += `<tr>
+          <td>${formatDate(row.dateFrom)}</td>
+          <td>${formatDate(row.dateTo)}</td>
+          <td>${row.reason}</td>
+          <td style="color:${color}; font-weight:bold;">${row.status}</td>
+        </tr>`;
+      });
+
+      html += "</table>";
+      document.getElementById("leaveStatusResult").innerHTML = html;
+    });
+});
+
+
+function formatDate(isoString) {
+  const date = new Date(isoString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // الشهر بيبدأ من 0
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
 
     </script>
   </body>
